@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SayitOUT - Express Yourself</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+        <style>
+            :root {
+                --primary-gradient: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+                --secondary-gradient: linear-gradient(135deg, #6B66FF, #4ECDC4);
+            }
+    
+            body {
+                background-color: #F0F4F8;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                min-height: 100vh;
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+    
+            .glass-nav {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
+    
+            .content-card {
+                background: white;
+                border-radius: 16px;
+                transition: all 0.3s ease;
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            }
+    
+            .content-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                border-color: #6B66FF;
+            }
+    
+            .gradient-text {
+                background: var(--primary-gradient);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+    
+            .gradient-bg {
+                background: var(--primary-gradient);
+            }
+    
+            .secondary-gradient-bg {
+                background: var(--secondary-gradient);
+            }
+    
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+    
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+    
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #4ECDC4;
+                border-radius: 10px;
+            }
+    
+            /* Updated Modal Styles */
+            .modal-content {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                width: calc(100% - 2rem);
+                max-width: 42rem;
+                margin: 1rem;
+                position: relative;
+            }
+    
+            #contentForm .modal-content {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+    
+            .floating-input {
+                position: relative;
+                margin-bottom: 1.5rem;
+            }
+    
+            .floating-input input,
+            .floating-input textarea {
+                width: 100%;
+                padding: 0.8rem;
+                border: 2px solid #e2e8f0;
+                border-radius: 10px;
+                outline: none;
+                transition: all 0.3s ease;
+            }
+    
+            .floating-input label {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                background: white;
+                padding: 0 0.5rem;
+                color: #718096;
+                transition: all 0.3s ease;
+                pointer-events: none;
+            }
+    
+            .floating-input input:focus + label,
+            .floating-input input:not(:placeholder-shown) + label,
+            .floating-input textarea:focus + label,
+            .floating-input textarea:not(:placeholder-shown) + label {
+                top: 0;
+                font-size: 0.875rem;
+                color: #4ECDC4;
+            }
+    
+            .floating-input input:focus,
+            .floating-input textarea:focus {
+                border-color: #4ECDC4;
+                box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+            }
+    
+            .tag {
+                background: rgba(78, 205, 196, 0.1);
+                color: #4ECDC4;
+                padding: 0.25rem 0.75rem;
+                border-radius: 9999px;
+                font-size: 0.875rem;
+                font-weight: 500;
+            }
+    
+            /* Mobile Specific Styles */
+            @media (max-width: 640px) {
+                #contentForm {
+                    align-items: flex-end !important;
+                    padding: 0 !important;
+                }
+    
+                #contentForm .modal-content {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    margin: 0 !important;
+                    border-bottom-left-radius: 0 !important;
+                    border-bottom-right-radius: 0 !important;
+                    border-top-left-radius: 20px !important;
+                    border-top-right-radius: 20px !important;
+                    max-height: 85vh !important;
+                    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem) !important;
+                    transform: none !important;
+                }
+    
+                .mobile-menu {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    padding: 1rem;
+                    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+                    display: flex;
+                    justify-content: space-around;
+                    z-index: 50;
+                    border-top: 1px solid rgba(0, 0, 0, 0.05);
+                }
+    
+                .mobile-menu button {
+                    flex: 1;
+                    margin: 0 0.25rem;
+                    padding: 0.5rem;
+                    border-radius: 10px;
+                    font-size: 0.875rem;
+                }
+    
+                main {
+                    padding-bottom: 5rem;
+                }
+    
+                /* Add slide-up animation for modals */
+                #contentForm:not(.hidden) .modal-content {
+                    animation: slideUp 0.3s ease-out;
+                }
+            }
+    
+            .notification {
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                background: white;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                z-index: 100;
+                animation: slideIn 0.3s ease;
+            }
+    
+            @keyframes slideIn {
+                from { transform: translateX(100%); }
+                to { transform: translateX(0); }
+            }
+    
+            @keyframes slideUp {
+                from { transform: translateY(100%); }
+                to { transform: translateY(0); }
+            }
+    
+            .reaction-btn {
+                padding: 0.5rem 1rem;
+                border-radius: 10px;
+                transition: all 0.2s ease;
+                background: rgba(78, 205, 196, 0.1);
+            }
+    
+            .reaction-btn:hover {
+                background: rgba(78, 205, 196, 0.2);
+                transform: scale(1.05);
+            }
+    
+            .content-fade {
+                mask-image: linear-gradient(180deg, #000 60%, transparent);
+                -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent);
+            }
+        </style>
+    </head>
+<body class="min-h-screen custom-scrollbar">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-nav">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold gradient-text">SayitOUT</h1>
+                <div class="hidden md:flex items-center space-x-4">
+                    <div id="userSection" class="hidden items-center space-x-4">
+                        <span id="userInfo" class="text-gray-600"></span>
+                        <button id="adminDashboardBtn" onclick="toggleAdminDashboard()" 
+                                class="hidden px-4 py-2 bg-gray-100 rounded-full hover:bg-gray-200 transition">
+                            Dashboard
+                        </button>
+                    </div>
+                    <button onclick="toggleSearch()" class="p-2 hover:bg-gray-100 rounded-full transition">
+                        🔍
+                    </button>
+                    <button id="shareBtn" onclick="toggleNewContent()" 
+                            class="hidden px-6 py-2 gradient-bg text-white rounded-full shadow-md hover:opacity-90 transition">
+                        Share
+                    </button>
+                    <button id="authBtn" onclick="toggleAuthModal()" 
+                            class="px-6 py-2 secondary-gradient-bg text-white rounded-full shadow-md hover:opacity-90 transition">
+                        Login
+                    </button>
+                    <button id="logoutBtn" onclick="logout()" 
+                            class="hidden px-6 py-2 bg-red-500 text-white rounded-full shadow-md hover:opacity-90 transition">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation -->
+    <div class="md:hidden mobile-menu">
+        <button onclick="toggleSearch()" class="text-gray-600 hover:text-gray-900">
+            🔍 Search
+        </button>
+        <button id="mobileShareBtn" onclick="toggleNewContent()" class="hidden text-gray-600 hover:text-gray-900">
+            ✏️ Share
+        </button>
+        <button id="mobileAuthBtn" onclick="toggleAuthModal()" class="text-gray-600 hover:text-gray-900">
+            👤 Login
+        </button>
+        <button id="mobileLogoutBtn" onclick="logout()" class="hidden text-gray-600 hover:text-gray-900">
+            🚪 Logout
+        </button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto px-4 pt-24">
+        <div class="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h2 class="text-2xl font-bold text-gray-800">Discover Thoughts</h2>
+            <div class="flex flex-wrap gap-4">
+                <select id="sortBy" onchange="displayContent()" 
+                        class="p-2 rounded-lg border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all">
+                    <option value="newest">Latest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="popular">Popular</option>
+                </select>
+                <select id="filterType" onchange="displayContent()" 
+                        class="p-2 rounded-lg border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all">
+                    <option value="all">All</option>
+                    <option value="thought">Thoughts</option>
+                    <option value="poem">Poems</option>
+                    <option value="quote">Quotes</option>
+                    <option value="story">Stories</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Content Grid -->
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" id="contentList"></div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Auth Modal -->
+    <div id="authModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-md p-6 animate__animated animate__fadeInUp">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="authTitle" class="text-2xl font-bold gradient-text">Login</h2>
+                <button onclick="toggleAuthModal()" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
+                <div class="floating-input">
+                    <input type="text" id="username" placeholder=" " class="w-full">
+                    <label>Username</label>
+                </div>
+                <div class="floating-input">
+                    <input type="password" id="password" placeholder=" " class="w-full">
+                    <label>Password</label>
+                </div>
+                <div id="adminFields" class="hidden floating-input">
+                    <input type="password" id="adminSecret" placeholder=" " class="w-full">
+                    <label>Admin Secret</label>
+                </div>
+                <div class="flex justify-between items-center">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="isAdmin" onchange="toggleAdminFields()">
+                        <span class="text-sm text-gray-600">Admin Account</span>
+                    </label>
+                    <button type="button" onclick="toggleAuthMode()" class="text-teal-600 hover:text-teal-700">
+                        <span id="authToggleText">Need an account?</span>
+                    </button>
+                </div>
+                <button type="submit" class="w-full py-3 gradient-bg text-white rounded-lg hover:opacity-90 transition">
+                    <span id="authButtonText">Login</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Content Form Modal -->
+    <div id="contentForm" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-2xl p-6 animate__animated animate__fadeInUp">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold gradient-text">Share Your Thoughts</h2>
+                <button onclick="toggleNewContent()" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div class="space-y-4">
+                <select id="contentType" class="w-full p-3 rounded-lg border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-200">
+                    <option value="thought">Random Thought</option>
+                    <option value="poem">Poem</option>
+                    <option value="quote">Quote</option>
+                    <option value="story">Short Story</option>
+                </select>
+                <div class="floating-input">
+                    <input type="text" id="contentTitle" placeholder=" " class="w-full">
+                    <label>Title</label>
+                </div>
+                <div class="floating-input">
+                    <input type="text" id="authorNickname" placeholder=" " class="w-full">
+                    <label>Nickname (optional)</label>
+                </div>
+                <div class="floating-input">
+                    <textarea id="contentText" placeholder=" " class="w-full h-64 resize-none"></textarea>
+                    <label>Your thoughts... (Markdown supported)</label>
+                </div>
+                <div id="preview" class="hidden p-4 rounded-lg bg-gray-50"></div>
+                <div class="flex justify-between items-center">
+                    <button onclick="togglePreview()" class="text-teal-600 hover:text-teal-700">
+                        Preview
+                    </button>
+                    <div class="space-x-2">
+                        <button onclick="toggleNewContent()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                            Cancel
+                        </button>
+                        <button onclick="saveContent()" class="px-6 py-2 gradient-bg text-white rounded-lg hover:opacity-90">
+                            Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Detail Modal -->
+    <div id="contentDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-3xl p-6 animate__animated animate__fadeInUp max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="detailTitle" class="text-2xl font-bold gradient-text"></h2>
+                <button onclick="toggleContentDetail()" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div id="detailMetadata" class="flex flex-wrap items-center gap-3 mb-6 text-sm"></div>
+            <div id="detailContent" class="prose max-w-none mb-6"></div>
+            <div class="border-t pt-4 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div id="detailViews" class="text-gray-600"></div>
+                    <div id="reactions" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div id="detailDate" class="text-sm text-gray-500"></div>
+                    <button id="deleteThoughtBtn" onclick="deleteThought()" 
+                            class="hidden px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-2xl p-6 animate__animated animate__fadeInDown">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold gradient-text">Search</h2>
+                <button onclick="toggleSearch()" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div class="relative mb-6">
+                <input type="text" id="searchInput" onkeyup="searchContent()" placeholder="Search thoughts..."
+                       class="w-full p-4 pl-12 rounded-lg border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-200">
+                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+            </div>
+            <div id="searchResults" class="max-h-96 overflow-y-auto custom-scrollbar divide-y divide-gray-100"></div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Modal -->
+    <div id="adminDashboard" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-4xl p-6 animate__animated animate__fadeInUp">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold gradient-text">Admin Dashboard</h2>
+                <button onclick="toggleAdminDashboard()" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="p-6 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl">
+                    <h3 class="text-lg font-semibold text-teal-800 mb-2">Total Thoughts</h3>
+                    <p id="totalThoughts" class="text-3xl font-bold text-teal-600">-</p>
+                </div>
+                <div class="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+                    <h3 class="text-lg font-semibold text-purple-800 mb-2">Total Users</h3>
+                    <p id="totalUsers" class="text-3xl font-bold text-purple-600">-</p>
+                </div>
+                <div class="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2">Latest Activity</h3>
+                    <p id="latestActivity" class="text-sm text-blue-600">-</p>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800">Recent Thoughts</h3>
+                <div id="recentThoughts" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keep the same script section from your original code, just update the createContentCard function -->
+    <script>
+        const API_URL = 'https://backend-7sk4.onrender.com';
+        let currentContent = null;
+        let isAdmin = false;
+        let currentUser = null;
+        let authToken = localStorage.getItem('token');
+
+        // Check authentication status on load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            displayContent();
+            window.addEventListener('unhandledrejection', event => {
+                handleFetchError(event.reason, 'An unexpected error occurred');
+            });
+        });
+
+        // Auth Functions
+        function checkAuth() {
+            if (authToken) {
+                const payload = parseJwt(authToken);
+                currentUser = payload;
+                isAdmin = payload.isAdmin;
+                updateUIForAuth();
+            }
+        }
+
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                return JSON.parse(window.atob(base64));
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function updateUIForAuth() {
+            document.getElementById('userSection').style.display = 'flex';
+            document.getElementById('userInfo').textContent = `Welcome, ${currentUser.username}`;
+            document.getElementById('authBtn').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('shareBtn').classList.remove('hidden');
+            
+            if (isAdmin) {
+                document.getElementById('adminDashboardBtn').classList.remove('hidden');
+            }
+        }
+
+        async function handleAuth(event) {
+            event.preventDefault();
+            const isLogin = document.getElementById('authButtonText').textContent === 'Login';
+            const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+            
+            const data = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+
+            if (!isLogin && document.getElementById('isAdmin').checked) {
+                data.isAdmin = true;
+                data.adminSecret = document.getElementById('adminSecret').value;
+            }
+
+            try {
+                const response = await fetch(API_URL + endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+
+                const { token } = await response.json();
+                localStorage.setItem('token', token);
+                authToken = token;
+                checkAuth();
+                toggleAuthModal();
+                showNotification(isLogin ? 'Login successful!' : 'Registration successful!', 'success');
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            authToken = null;
+            currentUser = null;
+            isAdmin = false;
+            location.reload();
+        }
+
+        // Content Functions
+        async function displayContent() {
+            const contentList = document.getElementById('contentList');
+            const filterType = document.getElementById('filterType').value;
+            const sortBy = document.getElementById('sortBy').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/thoughts`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const contents = await response.json();
+                if (!Array.isArray(contents)) throw new Error('Invalid data format received from server');
+
+                let filteredContents = filterType === 'all' ? 
+                    contents : 
+                    contents.filter(content => content.type === filterType);
+
+                filteredContents.sort((a, b) => {
+                    switch(sortBy) {
+                        case 'oldest': return new Date(a.timestamp) - new Date(b.timestamp);
+                        case 'popular': return (b.views || 0) - (a.views || 0);
+                        default: return new Date(b.timestamp) - new Date(a.timestamp);
+                    }
+                });
+
+                contentList.innerHTML = filteredContents.length ? 
+                    filteredContents.map(content => createContentCard(content)).join('') :
+                    createEmptyState();
+
+            } catch (error) {
+                handleFetchError(error, 'Failed to load content');
+                contentList.innerHTML = createErrorState();
+            }
+        }
+
+        
+
+        async function saveContent() {
+            if (!authToken) {
+                showNotification('Please login to share content', 'error');
+                return;
+            }
+
+            const title = document.getElementById('contentTitle').value.trim();
+            const text = document.getElementById('contentText').value.trim();
+            const type = document.getElementById('contentType').value;
+            const author = document.getElementById('authorNickname').value.trim() || currentUser.username;
+            
+            if (!title || !text) {
+                showNotification(`Please fill in all required fields`, 'error');
+                return;
+            }
+
+            const content = {
+                title,
+                text,
+                type,
+                author,
+                date: new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                views: 0,
+                reactions: {},
+                timestamp: Date.now()
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/api/thoughts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(content)
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to save content');
+                }
+                
+                const savedContent = await response.json();
+                toggleNewContent();
+                displayContent();
+                showNotification('Your thought has been shared successfully!', 'success');
+                setTimeout(() => toggleContentDetail(encodeURIComponent(JSON.stringify(savedContent))), 500);
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        function createEmptyState() {
+            const isLoggedIn = !!authToken;
+            return `
+                <div class="col-span-full flex flex-col items-center justify-center p-8 text-gray-500">
+                    <div class="text-6xl mb-4">💭</div>
+                    <h3 class="text-xl font-bold mb-2">No posts yet</h3>
+                    ${isLoggedIn ? 
+                        '<p>Be the first to share something!</p>' : 
+                        '<p>Login or register to start sharing your thoughts!</p>'
+                    }
+                    ${!isLoggedIn ? 
+                        '<button onclick="toggleAuthModal()" class="mt-4 px-6 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition">Get Started</button>' : 
+                        ''
+                    }
+                </div>
+            `;
+        }
+
+        // Modified deleteThought function
+        async function deleteThought(thoughtId) {
+            if (!isAdmin) return;
+            
+            const idToDelete = thoughtId || (currentContent && currentContent._id);
+            if (!idToDelete) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/thoughts/${idToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to delete content');
+
+                if (thoughtId) {
+                    // If called from dashboard
+                    loadAdminDashboard();
+                } else {
+                    // If called from content detail
+                    toggleContentDetail();
+                }
+                
+                displayContent();
+                showNotification('Content deleted successfully', 'success');
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        // Reaction handling
+        async function addReaction(emoji) {
+            if (!authToken) {
+                showNotification('Please login to react to posts', 'error');
+                return;
+            }
+            
+            if (!currentContent || !currentContent._id) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/thoughts/${currentContent._id}/react`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ emoji })
+                });
+                
+                if (!response.ok) throw new Error('Failed to add reaction');
+                
+                const updatedContent = await response.json();
+                currentContent = updatedContent;
+                setupReactions(updatedContent);
+                
+                const btn = document.querySelector(`button[data-emoji="${emoji}"]`);
+                if (btn) {
+                    btn.classList.add('animate__animated', 'animate__bounce');
+                    setTimeout(() => btn.classList.remove('animate__animated', 'animate__bounce'), 1000);
+                }
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        // Admin Dashboard
+        async function loadAdminDashboard() {
+            if (!isAdmin) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load dashboard data');
+
+                const data = await response.json();
+                
+                document.getElementById('totalThoughts').textContent = data.totalThoughts;
+                document.getElementById('totalUsers').textContent = data.totalUsers;
+                document.getElementById('latestActivity').textContent = 
+                    `Latest thought posted ${new Date(data.recentThoughts[0]?.timestamp).toLocaleString()}`;
+
+                document.getElementById('recentThoughts').innerHTML = data.recentThoughts
+                    .map(thought => `
+                        <div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold">${escapeHtml(thought.title)}</h4>
+                                <p class="text-sm text-gray-600">by ${escapeHtml(thought.author)}</p>
+                            </div>
+                            <button onclick="deleteThought('${thought._id}')"
+                                    class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                                Delete
+                            </button>
+                        </div>
+                    `)
+                    .join('');
+
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        // UI Toggles and Utilities
+        function toggleAuthModal() {
+            const modal = document.getElementById('authModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('username').focus();
+            }
+        }
+
+        function toggleAuthMode() {
+            const isLogin = document.getElementById('authButtonText').textContent === 'Login';
+            document.getElementById('authTitle').textContent = isLogin ? 'Register' : 'Login';
+            document.getElementById('authButtonText').textContent = isLogin ? 'Register' : 'Login';
+            document.getElementById('authToggleText').textContent = isLogin ? 'Already have an account?' : 'Need an account?';
+            document.getElementById('adminFields').classList.add('hidden');
+            document.getElementById('isAdmin').checked = false;
+        }
+
+        function toggleAdminFields() {
+            const adminFields = document.getElementById('adminFields');
+            const isAdmin = document.getElementById('isAdmin').checked;
+            adminFields.classList.toggle('hidden', !isAdmin);
+        }
+
+        function toggleNewContent() {
+            const contentForm = document.getElementById('contentForm');
+            const isHidden = contentForm.classList.contains('hidden');
+            
+            if (isHidden) {
+                document.body.style.overflow = 'hidden';
+                contentForm.classList.remove('hidden');
+                document.getElementById('contentTitle').focus();
+            } else {
+                document.body.style.overflow = '';
+                contentForm.classList.add('hidden');
+                // Clear form
+                document.getElementById('contentTitle').value = '';
+                document.getElementById('contentText').value = '';
+                document.getElementById('authorNickname').value = '';
+                document.getElementById('preview').classList.add('hidden');
+            }
+        }
+
+        function toggleContentDetail(contentString) {
+            const modal = document.getElementById('contentDetailModal');
+            
+            if (contentString) {
+                try {
+                    // Properly decode and parse the content
+                    const decodedString = decodeURIComponent(contentString).replace(/\+/g, ' ');
+                    currentContent = JSON.parse(decodedString);
+                    
+                    // Validate required content properties
+                    if (!currentContent || !currentContent.title || !currentContent.text) {
+                        throw new Error('Invalid content data');
+                    }
+                    
+                    updateDetailView();
+                    if (currentContent._id) {
+                        incrementViews(currentContent._id);
+                    }
+                } catch (error) {
+                    console.error('Error parsing content:', error);
+                    showNotification('Error loading content details. Please try again.', 'error');
+                    return;
+                }
+            }
+            
+            modal.classList.toggle('hidden');
+            document.body.style.overflow = modal.classList.contains('hidden') ? '' : 'hidden';
+        }
+
+        function toggleAdminDashboard() {
+            const dashboard = document.getElementById('adminDashboard');
+            dashboard.classList.toggle('hidden');
+            if (!dashboard.classList.contains('hidden')) {
+                loadAdminDashboard();
+            }
+        }
+
+        function toggleSearch() {
+            const modal = document.getElementById('searchModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('searchInput').focus();
+            }
+        }
+
+        function togglePreview() {
+            const preview = document.getElementById('preview');
+            const text = document.getElementById('contentText').value;
+            preview.innerHTML = marked(escapeHtml(text));
+            preview.classList.toggle('hidden');
+        }
+
+        // Search functionality
+        function searchContent() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const resultsContainer = document.getElementById('searchResults');
+
+            if (!searchTerm) {
+                resultsContainer.innerHTML = '';
+                return;
+            }
+
+            fetch(`${API_URL}/api/thoughts`)
+                .then(response => response.json())
+                .then(contents => {
+                    const filtered = contents.filter(content =>
+                        content.title.toLowerCase().includes(searchTerm) ||
+                        content.text.toLowerCase().includes(searchTerm)
+                    );
+
+                    resultsContainer.innerHTML = filtered.length ?
+                        filtered.map(content => `
+                            <div class="p-4 border-b cursor-pointer hover:bg-gray-50 transition"
+                                 onclick="toggleSearch(); toggleContentDetail('${encodeURIComponent(JSON.stringify(content))}')">
+                                <h3 class="font-bold">${escapeHtml(content.title)}</h3>
+                                <p class="text-sm text-gray-600">${escapeHtml(content.text.substring(0, 100))}...</p>
+                            </div>
+                        `).join('') :
+                        '<div class="p-4 text-gray-500">No results found</div>';
+                })
+                .catch(error => handleFetchError(error, 'Search failed'));
+        }
+
+        function updateDetailView() {
+            if (!currentContent) return;
+
+            try {
+                // Safely update UI elements with content validation
+                const detailTitle = document.getElementById('detailTitle');
+                const detailMetadata = document.getElementById('detailMetadata');
+                const detailContent = document.getElementById('detailContent');
+                const detailViews = document.getElementById('detailViews');
+                const detailDate = document.getElementById('detailDate');
+                const deleteThoughtBtn = document.getElementById('deleteThoughtBtn');
+
+                if (detailTitle) detailTitle.textContent = currentContent.title || 'Untitled';
+                
+                if (detailMetadata) {
+                    detailMetadata.innerHTML = `
+                        <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">
+                            ${escapeHtml(currentContent.type || 'thought')}
+                        </span>
+                        <span>By ${escapeHtml(currentContent.author || 'Anonymous')}</span>
+                    `;
+                }
+
+                if (detailContent) {
+                    const sanitizedText = escapeHtml(currentContent.text || '');
+                    detailContent.innerHTML = marked.parse(sanitizedText);
+                }
+
+                if (detailViews) {
+                    detailViews.innerHTML = `👁️ ${currentContent.views || 0} views`;
+                }
+
+                if (detailDate) {
+                    detailDate.textContent = currentContent.date || new Date().toLocaleString();
+                }
+
+                if (deleteThoughtBtn) {
+                    deleteThoughtBtn.classList.toggle('hidden', !isAdmin);
+                }
+
+                setupReactions(currentContent);
+            } catch (error) {
+                console.error('Error updating detail view:', error);
+                showNotification('Error displaying content details', 'error');
+            }
+        }
+
+        function setupReactions(content) {
+            const reactions = document.getElementById('reactions');
+            const emojis = ['👍', '❤️', '😂', '😮', '😢'];
+            
+            reactions.innerHTML = emojis.map(emoji => `
+                <button onclick="addReaction('${emoji}')"
+                        class="emoji-reaction px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 transition"
+                        data-emoji="${emoji}">
+                    ${emoji} ${(content.reactions && content.reactions[emoji]) || 0}
+                </button>
+            `).join('');
+        }
+
+        async function incrementViews(thoughtId) {
+            if (!thoughtId) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/thoughts/${thoughtId}/view`, {
+                    method: 'PATCH'
+                });
+                
+                if (!response.ok) throw new Error('Failed to update views');
+                
+                const updated = await response.json();
+                if (currentContent) {
+                    currentContent.views = updated.views;
+                    const detailViews = document.getElementById('detailViews');
+                    if (detailViews) {
+                        detailViews.innerHTML = `👁️ ${updated.views} views`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating views:', error);
+                // Don't show notification for view updates as it's not critical
+            }
+        }
+
+
+
+        function createErrorState() {
+            return `
+                <div class="col-span-full flex flex-col items-center justify-center p-8 text-gray-500">
+                    <div class="text-6xl mb-4">😅</div>
+                    <h3 class="text-xl font-bold mb-2">Oops! Something went wrong</h3>
+                    <p>Please try again later</p>
+                </div>
+            `;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg animate__animated animate__fadeIn z-50 ${
+                type === 'error' ? 'bg-red-500' : 'bg-green-500'
+            } text-white`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.classList.replace('animate__fadeIn', 'animate__fadeOut');
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        function handleFetchError(error, defaultMessage) {
+            console.error('API Error:', error);
+            showNotification(error.message || defaultMessage, 'error');
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function createContentCard(content) {
+            try {
+                // Validate required content properties
+                if (!content || !content.title || !content.text) {
+                    console.error('Invalid content data:', content);
+                    return '';
+                }
+
+                const processedText = marked.parse(escapeHtml(content.text));
+                const safeContent = {
+                    ...content,
+                    title: escapeHtml(content.title),
+                    author: escapeHtml(content.author || 'Anonymous'),
+                    type: escapeHtml(content.type || 'thought'),
+                    date: escapeHtml(content.date || ''),
+                    views: content.views || 0
+                };
+
+                // Create a safe stringified version of the content
+                const safeContentString = encodeURIComponent(JSON.stringify(safeContent));
+
+                return `
+                    <article class="content-card p-6 cursor-pointer animate__animated animate__fadeIn" 
+                            onclick="toggleContentDetail('${safeContentString}')">
+                        <div class="flex justify-between items-start mb-4">
+                            <h2 class="text-xl font-bold text-gray-800 hover:text-teal-600 transition">
+                                ${safeContent.title}
+                            </h2>
+                            <span class="tag">
+                                ${safeContent.type}
+                            </span>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-3">
+                            By ${safeContent.author}
+                        </div>
+                        <div class="content-fade prose prose-sm max-w-none mb-4" style="max-height: 150px; overflow: hidden;">
+                            ${processedText}
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-gray-500">
+                            <span class="flex items-center gap-1">👁️ ${safeContent.views}</span>
+                            <span>${safeContent.date}</span>
+                        </div>
+                    </article>
+                `;
+            } catch (error) {
+                console.error('Error creating content card:', error);
+                return '';
+            }
+        }
+
+        // Add this new function for mobile UI updates
+        function updateMobileUI(isAuthenticated) {
+                const mobileShareBtn = document.getElementById('mobileShareBtn');
+                const mobileAuthBtn = document.getElementById('mobileAuthBtn');
+                const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+
+                if (isAuthenticated) {
+                    mobileShareBtn.classList.remove('hidden');
+                    mobileAuthBtn.classList.add('hidden');
+                    mobileLogoutBtn.classList.remove('hidden');
+                } else {
+                    mobileShareBtn.classList.add('hidden');
+                    mobileAuthBtn.classList.remove('hidden');
+                    mobileLogoutBtn.classList.add('hidden');
+                }
+            }
+
+            // Update your updateUIForAuth function to include mobile UI
+            const originalUpdateUIForAuth = updateUIForAuth;
+            updateUIForAuth = function() {
+                originalUpdateUIForAuth();
+                updateMobileUI(true);
+            }
+
+            // Update your logout function to include mobile UI
+            const originalLogout = logout;
+            logout = function() {
+                originalLogout();
+                updateMobileUI(false);
+            }
+
+        function handleMobileModal() {
+            const contentForm = document.getElementById('contentForm');
+            const modalContent = contentForm.querySelector('.modal-content');
+            
+            function closeModal() {
+                document.body.style.overflow = '';
+                contentForm.classList.add('hidden');
+                resetForm();
+            }
+
+            function openModal() {
+                document.body.style.overflow = 'hidden';
+                contentForm.classList.remove('hidden');
+                document.getElementById('contentTitle').focus();
+            }
+
+            function resetForm() {
+                document.getElementById('contentTitle').value = '';
+                document.getElementById('contentText').value = '';
+                document.getElementById('authorNickname').value = '';
+                document.getElementById('preview').classList.add('hidden');
+            }
+
+            // Close modal when clicking outside
+            contentForm.addEventListener('click', (e) => {
+                if (e.target === contentForm) {
+                    closeModal();
+                }
+            });
+
+            // Prevent modal content clicks from bubbling up
+            modalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            // Handle share button click
+            document.getElementById('mobileShareBtn').addEventListener('click', openModal);
+            document.getElementById('shareBtn').addEventListener('click', openModal);
+
+            // Handle modal close button
+            const closeButton = modalContent.querySelector('button[onclick="toggleNewContent()"]');
+            if (closeButton) {
+                closeButton.addEventListener('click', closeModal);
+            }
+        }
+
+
+        // Call this function when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            displayContent();
+            handleMobileModal();
+            window.addEventListener('unhandledrejection', event => {
+                handleFetchError(event.reason, 'An unexpected error occurred');
+            });
+        });
+
+        // Update the createContentCard function to ensure content opening works
+        function createContentCard(content) {
+            const processedText = typeof marked === 'function' 
+                ? marked(escapeHtml(content.text))
+                : escapeHtml(content.text).replace(/\n/g, '<br>');
+
+            return `
+                <article class="content-card p-6 cursor-pointer animate__animated animate__fadeIn" 
+                         onclick="toggleContentDetail('${encodeURIComponent(JSON.stringify(content))}')">
+                    <div class="flex justify-between items-start mb-4">
+                        <h2 class="text-xl font-bold text-gray-800 hover:text-teal-600 transition">
+                            ${escapeHtml(content.title)}
+                        </h2>
+                        <span class="tag">
+                            ${escapeHtml(content.type)}
+                        </span>
+                    </div>
+                    <div class="text-sm text-gray-600 mb-3">
+                        By ${escapeHtml(content.author || 'Anonymous')}
+                    </div>
+                    <div class="content-fade prose prose-sm max-w-none mb-4" style="max-height: 150px; overflow: hidden;">
+                        ${processedText}
+                    </div>
+                    <div class="flex justify-between items-center text-sm text-gray-500">
+                        <span class="flex items-center gap-1">👁️ ${content.views || 0}</span>
+                        <span>${escapeHtml(content.date)}</span>
+                    </div>
+                </article>
+            `;
+        }
+    </script>
+</body>
+</html>
