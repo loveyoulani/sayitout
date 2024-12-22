@@ -289,6 +289,25 @@
                 scrollbar-width: thin;
                 scrollbar-color: #4ECDC4 #f1f1f1;
             }
+
+            .spoiler {
+                background-color: #021e1c9f;
+                color: transparent;
+                padding: 0 4px;
+                border-radius: 4px;
+                cursor: pointer;
+                user-select: none;
+                transition: all 0.2s ease;
+            }
+
+            .spoiler:hover {
+                background-color: #4a5568;
+            }
+
+            .spoiler.revealed {
+                background-color: #e2e8f0;
+                color: inherit;
+            }
     
             
         </style>
@@ -433,14 +452,14 @@
                     <label>Your thoughts... (Markdown supported)</label>
                 </div>
                 <div class="flex justify-between items-center mt-4">
-                    <button onclick="togglePreview()" 
-                            class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                        Preview
-                    </button>
-                    <button onclick="saveContent()" 
-                            class="px-6 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition">
-                        Share
-                    </button>
+                    <div class="space-x-2">
+                        <button onclick="toggleNewContent()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                            Cancel
+                        </button>
+                        <button onclick="saveContent()" class="px-6 py-2 gradient-bg text-white rounded-lg hover:opacity-90">
+                            Share
+                        </button>
+                    </div>
                 </div>
                 <div id="preview" class="hidden mt-4 p-4 bg-gray-50 rounded-lg prose max-w-none"></div>
             </div>
@@ -533,6 +552,13 @@
             setupTagInput();
             displayContent();
             handleMobileModal();
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('spoiler')) {
+                    e.stopPropagation(); // Prevent card from opening
+                    e.target.classList.toggle('revealed');
+                }
+            });
+
             window.addEventListener('unhandledrejection', event => {
                 handleFetchError(event.reason, 'An unexpected error occurred');
             });
@@ -847,7 +873,7 @@
                 document.getElementById('contentText').value = '';
                 document.getElementById('authorNickname').value = '';
                 document.getElementById('selectedTags').innerHTML = '';
-                document.getElementById('preview').classList.add('hidden');
+                
                 
                 toggleNewContent();
                 await displayContent();
@@ -1025,7 +1051,7 @@
                 document.getElementById('contentTitle').value = '';
                 document.getElementById('contentText').value = '';
                 document.getElementById('authorNickname').value = '';
-                document.getElementById('preview').classList.add('hidden');
+                
             }
         }
 
@@ -1074,13 +1100,7 @@
             }
         }
 
-        function togglePreview() {
-            const preview = document.getElementById('preview');
-            const text = document.getElementById('contentText').value;
-            preview.innerHTML = marked(escapeHtml(text));
-            preview.classList.toggle('hidden');
-        }
-
+        
         // Search functionality
         function searchContent() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -1135,9 +1155,19 @@
                     `;
                 }
 
+            
                 if (detailContent) {
                     const sanitizedText = escapeHtml(currentContent.text || '');
-                    detailContent.innerHTML = marked.parse(sanitizedText);
+                    const processedText = processSpoilerText(sanitizedText);
+                    detailContent.innerHTML = marked.parse(processedText);
+                    
+                    // Add click handlers for spoiler texts
+                    detailContent.querySelectorAll('.spoiler').forEach(spoiler => {
+                        spoiler.addEventListener('click', (e) => {
+                            e.stopPropagation(); // Prevent modal from closing
+                            spoiler.classList.toggle('revealed');
+                        });
+                    });
                 }
 
                 if (detailViews) {
@@ -1267,10 +1297,10 @@
 
                 const formattedText = formatText(text);
                 const truncatedText = truncateText(formattedText, 150); // Reduced character limit
-                
+            
                 const processedText = typeof marked === 'function' 
-                    ? marked(escapeHtml(truncatedText))
-                    : escapeHtml(truncatedText).replace(/\n/g, '<br>');
+                    ? marked(processSpoilerText(escapeHtml(truncatedText)))
+                    : processSpoilerText(escapeHtml(truncatedText)).replace(/\n/g, '<br>')
                 
                 return `
                     <article class="content-card p-4 cursor-pointer animate__animated animate__fadeIn" 
@@ -1365,7 +1395,7 @@
                 document.getElementById('contentTitle').value = '';
                 document.getElementById('contentText').value = '';
                 document.getElementById('authorNickname').value = '';
-                document.getElementById('preview').classList.add('hidden');
+                
             }
 
             // Close modal when clicking outside
@@ -1414,14 +1444,17 @@
             if (text.length <= maxLength) return text;
             return text.substr(0, maxLength).trim() + '...';
         }
-
+        function processSpoilerText(text) {
+            return text.replace(/\|\|(.*?)\|\|/g, '<span class="spoiler">$1</span>');
+        }
+        
         function formatText(text) {
-            // Preserve line breaks and spacing while preventing XSS
             return text
                 .split('\n')
                 .map(line => line.trim())
                 .filter(line => line.length > 0)
-                .join('\n');
+                .join('\n')
+                .replace(/\n{3,}/g, '\n\n'); 
         }
 
         function validateContent(text) {
