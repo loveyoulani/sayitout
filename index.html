@@ -28,12 +28,57 @@
             }
     
             .content-card {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                min-height: 200px;
+                max-height: 280px;
+                overflow: hidden;
                 background: white;
-                border-radius: 16px;
+                border: 1px solid #e2e8f0;
+                border-radius: 1rem;
                 transition: all 0.3s ease;
-                border: 1px solid rgba(0, 0, 0, 0.05);
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             }
+
+            .content-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                border-color: #6B66FF;
+            }
+
+            .content-preview {
+                position: relative;
+                max-height: 100px;
+                overflow: hidden;
+                margin-bottom: 1rem;
+            }
+
+            .content-preview::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 40px;
+                background: linear-gradient(to bottom, transparent, white);
+            }
+
+            .title-clamp {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                -webkit-line-clamp: 1;
+                line-height: 1.5;
+            }
+
+            .text-clamp {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                -webkit-line-clamp: 3;
+                line-height: 1.5;
+            }
+
     
             .content-card:hover {
                 transform: translateY(-5px);
@@ -225,11 +270,27 @@
                 background: rgba(78, 205, 196, 0.2);
                 transform: scale(1.05);
             }
-    
-            .content-fade {
-                mask-image: linear-gradient(180deg, #000 60%, transparent);
-                -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent);
+            #contentDetailModal .modal-content {
+                max-height: 90vh;
+                overflow-y: auto;
             }
+
+            #contentDetailModal .prose {
+                white-space: pre-wrap;
+                word-break: break-word;
+            }
+
+            #contentDetailModal .prose p {
+                margin-bottom: 1rem;
+            }
+
+            /* Add smooth scrolling */
+            .custom-scrollbar {
+                scrollbar-width: thin;
+                scrollbar-color: #4ECDC4 #f1f1f1;
+            }
+    
+            
         </style>
     </head>
 <body class="min-h-screen custom-scrollbar">
@@ -345,7 +406,7 @@
         </div>
     </div>
 
-    <!-- Content Form Modal -->
+    <!-- Update the content form section in your HTML -->
     <div id="contentForm" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="modal-content w-full max-w-2xl p-6 animate__animated animate__fadeInUp">
             <div class="flex justify-between items-center mb-6">
@@ -359,9 +420,9 @@
                     <option value="quote">Quote</option>
                     <option value="story">Short Story</option>
                 </select>
-                <div class="floating-input">
+                <div class="floating-input" id="titleContainer">
                     <input type="text" id="contentTitle" placeholder=" " class="w-full">
-                    <label>Title</label>
+                    <label>Title (required for stories and poems)</label>
                 </div>
                 <div class="floating-input">
                     <input type="text" id="authorNickname" placeholder=" " class="w-full">
@@ -371,20 +432,17 @@
                     <textarea id="contentText" placeholder=" " class="w-full h-64 resize-none"></textarea>
                     <label>Your thoughts... (Markdown supported)</label>
                 </div>
-                <div id="preview" class="hidden p-4 rounded-lg bg-gray-50"></div>
-                <div class="flex justify-between items-center">
-                    <button onclick="togglePreview()" class="text-teal-600 hover:text-teal-700">
+                <div class="flex justify-between items-center mt-4">
+                    <button onclick="togglePreview()" 
+                            class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
                         Preview
                     </button>
-                    <div class="space-x-2">
-                        <button onclick="toggleNewContent()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-                            Cancel
-                        </button>
-                        <button onclick="saveContent()" class="px-6 py-2 gradient-bg text-white rounded-lg hover:opacity-90">
-                            Share
-                        </button>
-                    </div>
+                    <button onclick="saveContent()" 
+                            class="px-6 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition">
+                        Share
+                    </button>
                 </div>
+                <div id="preview" class="hidden mt-4 p-4 bg-gray-50 rounded-lg prose max-w-none"></div>
             </div>
         </div>
     </div>
@@ -466,15 +524,133 @@
         let currentUser = null;
         let authToken = localStorage.getItem('token');
 
-        // Check authentication status on load
+        // Add default tags
+        const defaultTags = ['love', 'life', 'inspiration', 'happiness', 'motivation', 'poetry', 'thoughts', 'emotions'];
+
         document.addEventListener('DOMContentLoaded', () => {
             checkAuth();
+            setupContentTypeListener();
+            setupTagInput();
             displayContent();
+            handleMobileModal();
             window.addEventListener('unhandledrejection', event => {
                 handleFetchError(event.reason, 'An unexpected error occurred');
             });
         });
 
+        function setupContentTypeListener() {
+            const contentType = document.getElementById('contentType');
+            const titleInput = document.getElementById('contentTitle');
+            const titleContainer = titleInput.parentElement;
+
+            contentType.addEventListener('change', () => {
+                const type = contentType.value;
+                if (type === 'quote') {
+                    titleContainer.style.display = 'none';
+                    titleInput.removeAttribute('required');
+                } else if (type === 'thought') {
+                    titleContainer.style.display = 'block';
+                    titleInput.removeAttribute('required');
+                } else {
+                    titleContainer.style.display = 'block';
+                    titleInput.setAttribute('required', 'required');
+                }
+            });
+        }
+
+        function setupTagInput() {
+            const tagContainer = document.createElement('div');
+            tagContainer.className = 'mb-4 space-y-2';
+            tagContainer.innerHTML = `
+                <label class="text-sm text-gray-600">Tags</label>
+                <div class="flex flex-wrap gap-2 mb-2" id="selectedTags"></div>
+                <div class="relative">
+                    <input type="text" id="tagInput" 
+                        class="w-full p-2 border rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200"
+                        placeholder="Add tags (press Enter to add)">
+                    <div id="tagSuggestions" class="hidden absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"></div>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-2">
+                    ${defaultTags.map(tag => `
+                        <button onclick="addTag('${tag}')" 
+                                class="px-2 py-1 text-sm bg-gray-100 rounded-full hover:bg-gray-200 transition">
+                            #${tag}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+
+            const contentForm = document.querySelector('#contentForm .space-y-4');
+            contentForm.insertBefore(tagContainer, contentForm.querySelector('.floating-input:last-of-type'));
+
+            const tagInput = document.getElementById('tagInput');
+            const tagSuggestions = document.getElementById('tagSuggestions');
+            
+            tagInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const tag = tagInput.value.trim().toLowerCase();
+                    if (tag) addTag(tag);
+                }
+            });
+
+            tagInput.addEventListener('input', () => {
+                const input = tagInput.value.toLowerCase();
+                if (input) {
+                    const suggestions = defaultTags.filter(tag => 
+                        tag.includes(input) && !getSelectedTags().includes(tag)
+                    );
+                    
+                    tagSuggestions.innerHTML = suggestions.map(tag => `
+                        <div onclick="addTag('${tag}')" 
+                            class="p-2 cursor-pointer hover:bg-gray-100">
+                            #${tag}
+                        </div>
+                    `).join('');
+                    
+                    tagSuggestions.classList.toggle('hidden', suggestions.length === 0);
+                } else {
+                    tagSuggestions.classList.add('hidden');
+                }
+            });
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!tagInput.contains(e.target)) {
+                    tagSuggestions.classList.add('hidden');
+                }
+            });
+        }
+
+        function addTag(tag) {
+            const selectedTags = document.getElementById('selectedTags');
+            const tagInput = document.getElementById('tagInput');
+            const tags = getSelectedTags();
+
+            if (!tags.includes(tag) && tags.length < 5) {
+                selectedTags.innerHTML += `
+                    <span class="inline-flex items-center gap-1 px-3 py-1 bg-teal-100 text-teal-800 rounded-full">
+                        #${tag}
+                        <button onclick="removeTag(this)" class="text-teal-600 hover:text-teal-800">×</button>
+                    </span>
+                `;
+            }
+            
+            tagInput.value = '';
+            document.getElementById('tagSuggestions').classList.add('hidden');
+        }
+
+        function removeTag(button) {
+            button.parentElement.remove();
+        }
+
+        function getSelectedTags() {
+            const tags = [];
+            document.querySelectorAll('#selectedTags span').forEach(tag => {
+                tags.push(tag.textContent.trim().slice(1, -1)); // Remove # and × button
+            });
+            return tags;
+        }
         // Auth Functions
         function checkAuth() {
             if (authToken) {
@@ -561,23 +737,33 @@
             const sortBy = document.getElementById('sortBy').value;
             
             try {
-                const response = await fetch(`${API_URL}/api/thoughts`);
+                let endpoint = `${API_URL}/api/thoughts`;
+                if (authToken && sortBy === 'recommended') {
+                    endpoint = `${API_URL}/api/thoughts/recommended`;
+                }
+
+                const response = await fetch(endpoint, {
+                    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+                });
+                
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 
-                const contents = await response.json();
+                let contents = await response.json();
                 if (!Array.isArray(contents)) throw new Error('Invalid data format received from server');
 
                 let filteredContents = filterType === 'all' ? 
                     contents : 
                     contents.filter(content => content.type === filterType);
 
-                filteredContents.sort((a, b) => {
-                    switch(sortBy) {
-                        case 'oldest': return new Date(a.timestamp) - new Date(b.timestamp);
-                        case 'popular': return (b.views || 0) - (a.views || 0);
-                        default: return new Date(b.timestamp) - new Date(a.timestamp);
-                    }
-                });
+                if (sortBy !== 'recommended') {
+                    filteredContents.sort((a, b) => {
+                        switch(sortBy) {
+                            case 'oldest': return new Date(a.timestamp) - new Date(b.timestamp);
+                            case 'popular': return (b.views || 0) - (a.views || 0);
+                            default: return new Date(b.timestamp) - new Date(a.timestamp);
+                        }
+                    });
+                }
 
                 contentList.innerHTML = filteredContents.length ? 
                     filteredContents.map(content => createContentCard(content)).join('') :
@@ -589,6 +775,7 @@
             }
         }
 
+
         
 
         async function saveContent() {
@@ -597,34 +784,48 @@
                 return;
             }
 
+            const type = document.getElementById('contentType').value;
             const title = document.getElementById('contentTitle').value.trim();
             const text = document.getElementById('contentText').value.trim();
-            const type = document.getElementById('contentType').value;
             const author = document.getElementById('authorNickname').value.trim() || currentUser.username;
-            
-            if (!title || !text) {
-                showNotification(`Please fill in all required fields`, 'error');
-                return;
-            }
+            const tags = getSelectedTags();
 
-            const content = {
-                title,
-                text,
-                type,
-                author,
-                date: new Date().toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }),
-                views: 0,
-                reactions: {},
-                timestamp: Date.now()
-            };
-            
             try {
+                // Validate content length
+                validateContent(text);
+
+                if ((type === 'story' || type === 'poem') && !title) {
+                    throw new Error('Title is required for stories and poems');
+                }
+
+                if (!text) {
+                    throw new Error('Content text is required');
+                }
+
+                if (text.length < 10) {
+                    throw new Error('Content must be at least 10 characters long');
+                }
+
+                if (tags.length === 0) {
+                    throw new Error('Please add at least one tag');
+                }
+
+                const content = {
+                    title: title || 'Untitled',
+                    text: formatText(text), // Format text before saving
+                    type,
+                    author,
+                    tags,
+                    date: new Date().toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    timestamp: Date.now()
+                };
+                
                 const response = await fetch(`${API_URL}/api/thoughts`, {
                     method: 'POST',
                     headers: {
@@ -640,14 +841,25 @@
                 }
                 
                 const savedContent = await response.json();
+                
+                // Clear form and reset UI
+                document.getElementById('contentTitle').value = '';
+                document.getElementById('contentText').value = '';
+                document.getElementById('authorNickname').value = '';
+                document.getElementById('selectedTags').innerHTML = '';
+                document.getElementById('preview').classList.add('hidden');
+                
                 toggleNewContent();
-                displayContent();
+                await displayContent();
                 showNotification('Your thought has been shared successfully!', 'success');
+                
                 setTimeout(() => toggleContentDetail(encodeURIComponent(JSON.stringify(savedContent))), 500);
             } catch (error) {
                 showNotification(error.message, 'error');
             }
         }
+
+
 
         function createEmptyState() {
             const isLoggedIn = !!authToken;
@@ -718,7 +930,7 @@
                     body: JSON.stringify({ emoji })
                 });
                 
-                if (!response.ok) throw new Error('Failed to add reaction');
+                if (!response.ok) throw new Error('Failed to update reaction');
                 
                 const updatedContent = await response.json();
                 currentContent = updatedContent;
@@ -822,17 +1034,16 @@
             
             if (contentString) {
                 try {
-                    // Properly decode and parse the content
                     const decodedString = decodeURIComponent(contentString).replace(/\+/g, ' ');
                     currentContent = JSON.parse(decodedString);
                     
-                    // Validate required content properties
                     if (!currentContent || !currentContent.title || !currentContent.text) {
                         throw new Error('Invalid content data');
                     }
                     
                     updateDetailView();
-                    if (currentContent._id) {
+                    // Only increment views if user is authenticated and modal is being opened
+                    if (currentContent._id && authToken && modal.classList.contains('hidden')) {
                         incrementViews(currentContent._id);
                     }
                 } catch (error) {
@@ -845,6 +1056,7 @@
             modal.classList.toggle('hidden');
             document.body.style.overflow = modal.classList.contains('hidden') ? '' : 'hidden';
         }
+
 
         function toggleAdminDashboard() {
             const dashboard = document.getElementById('adminDashboard');
@@ -951,21 +1163,31 @@
             const reactions = document.getElementById('reactions');
             const emojis = ['👍', '❤️', '😂', '😮', '😢'];
             
-            reactions.innerHTML = emojis.map(emoji => `
-                <button onclick="addReaction('${emoji}')"
-                        class="emoji-reaction px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 transition"
-                        data-emoji="${emoji}">
-                    ${emoji} ${(content.reactions && content.reactions[emoji]) || 0}
-                </button>
-            `).join('');
+            reactions.innerHTML = emojis.map(emoji => {
+                const reactionList = content.reactions && content.reactions[emoji] || [];
+                const hasReacted = reactionList.some(r => r.userId === currentUser?.id);
+                const count = reactionList.length;
+                
+                return `
+                    <button onclick="addReaction('${emoji}')"
+                            class="emoji-reaction px-3 py-1 rounded-lg ${hasReacted ? 'bg-teal-100' : 'bg-gray-100'} 
+                                hover:bg-gray-200 transition"
+                            data-emoji="${emoji}">
+                        ${emoji} ${count}
+                    </button>
+                `;
+            }).join('');
         }
 
         async function incrementViews(thoughtId) {
-            if (!thoughtId) return;
+            if (!thoughtId || !authToken) return; // Add authToken check
             
             try {
                 const response = await fetch(`${API_URL}/api/thoughts/${thoughtId}/view`, {
-                    method: 'PATCH'
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}` // Add auth header
+                    }
                 });
                 
                 if (!response.ok) throw new Error('Failed to update views');
@@ -977,10 +1199,15 @@
                     if (detailViews) {
                         detailViews.innerHTML = `👁️ ${updated.views} views`;
                     }
+                    
+                    // Also update the view count in the content card if it exists
+                    const cardViews = document.querySelector(`[data-thought-id="${thoughtId}"] .view-count`);
+                    if (cardViews) {
+                        cardViews.textContent = `👁️ ${updated.views}`;
+                    }
                 }
             } catch (error) {
                 console.error('Error updating views:', error);
-                // Don't show notification for view updates as it's not critical
             }
         }
 
@@ -1025,45 +1252,59 @@
 
         function createContentCard(content) {
             try {
-                // Validate required content properties
-                if (!content || !content.title || !content.text) {
-                    console.error('Invalid content data:', content);
+                if (!content || typeof content !== 'object') {
+                    console.error('Invalid content object:', content);
                     return '';
                 }
 
-                const processedText = marked.parse(escapeHtml(content.text));
-                const safeContent = {
-                    ...content,
-                    title: escapeHtml(content.title),
-                    author: escapeHtml(content.author || 'Anonymous'),
-                    type: escapeHtml(content.type || 'thought'),
-                    date: escapeHtml(content.date || ''),
-                    views: content.views || 0
-                };
+                const title = content.title || 'Untitled';
+                const text = content.text || '';
+                const type = content.type || 'thought';
+                const author = content.author || 'Anonymous';
+                const date = content.date || new Date().toLocaleString();
+                const views = content.views || 0;
+                const tags = Array.isArray(content.tags) ? content.tags : [];
 
-                // Create a safe stringified version of the content
-                const safeContentString = encodeURIComponent(JSON.stringify(safeContent));
-
+                const formattedText = formatText(text);
+                const truncatedText = truncateText(formattedText, 150); // Reduced character limit
+                
+                const processedText = typeof marked === 'function' 
+                    ? marked(escapeHtml(truncatedText))
+                    : escapeHtml(truncatedText).replace(/\n/g, '<br>');
+                
                 return `
-                    <article class="content-card p-6 cursor-pointer animate__animated animate__fadeIn" 
-                            onclick="toggleContentDetail('${safeContentString}')">
-                        <div class="flex justify-between items-start mb-4">
-                            <h2 class="text-xl font-bold text-gray-800 hover:text-teal-600 transition">
-                                ${safeContent.title}
-                            </h2>
-                            <span class="tag">
-                                ${safeContent.type}
-                            </span>
-                        </div>
-                        <div class="text-sm text-gray-600 mb-3">
-                            By ${safeContent.author}
-                        </div>
-                        <div class="content-fade prose prose-sm max-w-none mb-4" style="max-height: 150px; overflow: hidden;">
-                            ${processedText}
-                        </div>
-                        <div class="flex justify-between items-center text-sm text-gray-500">
-                            <span class="flex items-center gap-1">👁️ ${safeContent.views}</span>
-                            <span>${safeContent.date}</span>
+                    <article class="content-card p-4 cursor-pointer animate__animated animate__fadeIn" 
+                            data-thought-id="${content._id}"
+                            onclick="toggleContentDetail('${encodeURIComponent(JSON.stringify(content))}')">
+                        <div class="flex flex-col h-full">
+                            <div class="flex justify-between items-start mb-2">
+                                <h2 class="text-lg font-bold text-gray-800 hover:text-teal-600 transition title-clamp">
+                                    ${escapeHtml(title)}
+                                </h2>
+                                <span class="tag text-xs flex-shrink-0 ml-2">
+                                    ${escapeHtml(type)}
+                                </span>
+                            </div>
+                            <div class="text-xs text-gray-600 mb-2">
+                                By ${escapeHtml(author)}
+                            </div>
+                            <div class="content-preview flex-grow">
+                                <div class="prose prose-sm max-w-none text-clamp">
+                                    ${processedText}
+                                </div>
+                            </div>
+                            <div class="mt-auto pt-3 border-t">
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    ${tags.slice(0, 3).map(tag => `
+                                        <span class="text-xs text-teal-600">#${escapeHtml(tag)}</span>
+                                    `).join('')}
+                                    ${tags.length > 3 ? `<span class="text-xs text-gray-400">+${tags.length - 3}</span>` : ''}
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-gray-500">
+                                    <span class="flex items-center gap-1 view-count">👁️ ${views}</span>
+                                    <span>${escapeHtml(date)}</span>
+                                </div>
+                            </div>
                         </div>
                     </article>
                 `;
@@ -1161,36 +1402,39 @@
             });
         });
 
-        // Update the createContentCard function to ensure content opening works
-        function createContentCard(content) {
-            const processedText = typeof marked === 'function' 
-                ? marked(escapeHtml(content.text))
-                : escapeHtml(content.text).replace(/\n/g, '<br>');
+        
+        document.getElementById('sortBy').innerHTML = `
+            <option value="newest">Latest</option>
+            <option value="oldest">Oldest</option>
+            <option value="popular">Popular</option>
+            ${authToken ? '<option value="recommended">Recommended</option>' : ''}
+        `;
 
-            return `
-                <article class="content-card p-6 cursor-pointer animate__animated animate__fadeIn" 
-                         onclick="toggleContentDetail('${encodeURIComponent(JSON.stringify(content))}')">
-                    <div class="flex justify-between items-start mb-4">
-                        <h2 class="text-xl font-bold text-gray-800 hover:text-teal-600 transition">
-                            ${escapeHtml(content.title)}
-                        </h2>
-                        <span class="tag">
-                            ${escapeHtml(content.type)}
-                        </span>
-                    </div>
-                    <div class="text-sm text-gray-600 mb-3">
-                        By ${escapeHtml(content.author || 'Anonymous')}
-                    </div>
-                    <div class="content-fade prose prose-sm max-w-none mb-4" style="max-height: 150px; overflow: hidden;">
-                        ${processedText}
-                    </div>
-                    <div class="flex justify-between items-center text-sm text-gray-500">
-                        <span class="flex items-center gap-1">👁️ ${content.views || 0}</span>
-                        <span>${escapeHtml(content.date)}</span>
-                    </div>
-                </article>
-            `;
+        function truncateText(text, maxLength = 300) {
+            if (text.length <= maxLength) return text;
+            return text.substr(0, maxLength).trim() + '...';
         }
+
+        function formatText(text) {
+            // Preserve line breaks and spacing while preventing XSS
+            return text
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0)
+                .join('\n\n');
+        }
+
+        function validateContent(text) {
+            const wordCount = text.trim().split(/\s+/).length;
+            const MAX_WORDS = 10000;
+            
+            if (wordCount > MAX_WORDS) {
+                throw new Error(`Content exceeds ${MAX_WORDS} words limit. Please shorten your text.`);
+            }
+            
+            return text;
+        }
+
     </script>
 </body>
 </html>
