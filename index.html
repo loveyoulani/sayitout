@@ -427,7 +427,7 @@
                     <div id="reactions" class="flex flex-wrap gap-2"></div>
                 </div>
                 <div class="flex justify-between items-center mt-4">
-                    <button onclick="shareContent(event)" class="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition flex items-center gap-2">
+                    <button onclick="shareContent(event)" class="px-4 py-2 bg-teal-500 text-black rounded-lg hover:bg-teal-600 transition flex items-center gap-2">
                         📤 Share
                     </button>
                 </div>
@@ -491,6 +491,7 @@
         let isLoading = false;
         let hasMore = true;
         const defaultTags = ['love', 'life', 'inspiration', 'happiness', 'motivation', 'poetry', 'thoughts', 'emotions'];
+
         document.addEventListener('DOMContentLoaded', async () => {
             checkAuth();
             addLoader();
@@ -523,25 +524,14 @@
             
             if (thoughtId) {
                 try {
-                    const response = await fetch(`${API_URL}/api/thoughts/${thoughtId}`);
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch thought');
-                    }
-                    const thought = await response.json();
-                    if (!thought) {
-                        throw new Error('Thought not found');
-                    }
-                    // Small delay to ensure DOM is ready
-                    setTimeout(() => {
-                        toggleContentDetail(encodeURIComponent(JSON.stringify(thought)));
-                    }, 100);
+                    // Directly toggle the content detail with the ID
+                    toggleContentDetail(thoughtId);
                 } catch (error) {
                     console.error('Error loading shared thought:', error);
-                    showNotification('Unable to load the shared content. It may have been deleted or is no longer available.', 'error');
+                    showNotification('Unable to load the shared content. Please try again later.', 'error');
                 }
             }
 
-            displayContent();
 
             window.addEventListener('unhandledrejection', event => {
                 handleFetchError(event.reason, 'An unexpected error occurred');
@@ -982,39 +972,45 @@
                 
             }
         }
-        function toggleContentDetail(contentString) {
+        async function toggleContentDetail(contentString) {
             const modal = document.getElementById('contentDetailModal');
             
             if (contentString) {
                 try {
-                    const decodedString = decodeURIComponent(contentString).replace(/\+/g, ' ');
-                    currentContent = JSON.parse(decodedString);
+                    let content;
                     
-                    // Validate the content object
-                    if (!currentContent || typeof currentContent !== 'object') {
+                    // Check if it's a direct thought ID from URL
+                    if (contentString.length < 40) { // Assuming it's an ID if it's short
+                        const response = await fetch(`${API_URL}/api/thoughts/${contentString}`);
+                        if (!response.ok) throw new Error('Failed to fetch thought');
+                        content = await response.json();
+                    } else {
+                        // Parse the encoded JSON string
+                        const decodedString = decodeURIComponent(contentString);
+                        content = JSON.parse(decodedString);
+                    }
+                    
+                    if (!content || !content.text) {
                         throw new Error('Invalid content format');
                     }
 
-                    // Check for required fields
-                    if (!currentContent.text) {
-                        throw new Error('Content is missing required fields');
-                    }
-
-                    // If no title, set a default
+                    currentContent = content;
                     currentContent.title = currentContent.title || 'Untitled';
                     
                     updateDetailView();
                     
-                    // Update view count if necessary
                     if (currentContent._id && authToken && modal.classList.contains('hidden')) {
                         incrementViews(currentContent._id);
                     }
                     
-                    // Update URL without reloading the page
-                    const newUrl = currentContent._id ? 
-                        `${window.location.pathname}?thought=${currentContent._id}` : 
-                        window.location.pathname;
-                    window.history.pushState({}, '', newUrl);
+                    // Update URL only if we have a valid thought ID
+                    if (currentContent._id) {
+                        const newUrl = `${window.location.pathname}?thought=${currentContent._id}`;
+                        window.history.pushState({}, '', newUrl);
+                    }
+                    
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
                     
                 } catch (error) {
                     console.error('Error parsing content:', error);
@@ -1024,11 +1020,11 @@
             } else {
                 // Clear the URL parameter when closing the modal
                 window.history.pushState({}, '', window.location.pathname);
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
             }
-            
-            modal.classList.toggle('hidden');
-            document.body.style.overflow = modal.classList.contains('hidden') ? '' : 'hidden';
         }
+
         function toggleAdminDashboard() {
             const dashboard = document.getElementById('adminDashboard');
             dashboard.classList.toggle('hidden');
@@ -1404,8 +1400,10 @@
                 return;
             }
 
-            const shareUrl = `${window.location.origin}${window.location.pathname}?thought=${currentContent._id}`;
-            
+            // Construct the absolute URL for sharing
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}?thought=${currentContent._id}`;
+
             try {
                 if (navigator.share) {
                     await navigator.share({
@@ -1419,7 +1417,6 @@
                 }
             } catch (error) {
                 console.error('Sharing failed:', error);
-                // Fallback to clipboard copy if sharing fails
                 copyToClipboard(shareUrl);
             }
         }
@@ -1440,5 +1437,6 @@
             document.body.removeChild(input);
         }
     </script>
+    
 </body>
 </html>
