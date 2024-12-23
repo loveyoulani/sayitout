@@ -12,21 +12,18 @@
                 --primary-gradient: linear-gradient(135deg, #FF6B6B, #4ECDC4);
                 --secondary-gradient: linear-gradient(135deg, #6B66FF, #4ECDC4);
             }
-    
             body {
                 background-color: #F0F4F8;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
                 min-height: 100vh;
                 padding-bottom: env(safe-area-inset-bottom);
             }
-    
             .glass-nav {
                 background: rgba(255, 255, 255, 0.95);
                 backdrop-filter: blur(10px);
                 -webkit-backdrop-filter: blur(10px);
                 border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             }
-    
             .content-card {
                 display: flex;
                 flex-direction: column;
@@ -39,20 +36,17 @@
                 border-radius: 1rem;
                 transition: all 0.3s ease;
             }
-
             .content-card:hover {
                 transform: translateY(-5px);
                 box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
                 border-color: #6B66FF;
             }
-
             .content-preview {
                 position: relative;
                 max-height: 100px;
                 overflow: hidden;
                 margin-bottom: 1rem;
             }
-
             .content-preview::after {
                 content: '';
                 position: absolute;
@@ -62,7 +56,6 @@
                 height: 40px;
                 background: linear-gradient(to bottom, transparent, white);
             }
-
             .title-clamp {
                 display: -webkit-box;
                 -webkit-box-orient: vertical;
@@ -70,7 +63,6 @@
                 -webkit-line-clamp: 1;
                 line-height: 1.5;
             }
-
             .text-clamp {
                 display: -webkit-box;
                 -webkit-box-orient: vertical;
@@ -78,45 +70,35 @@
                 -webkit-line-clamp: 3;
                 line-height: 1.5;
             }
-
-    
             .content-card:hover {
                 transform: translateY(-5px);
                 box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
                 border-color: #6B66FF;
             }
-    
             .gradient-text {
                 background: var(--primary-gradient);
                 -webkit-background-clip: text;
                 background-clip: text;
                 color: transparent;
             }
-    
             .gradient-bg {
                 background: var(--primary-gradient);
             }
-    
             .secondary-gradient-bg {
                 background: var(--secondary-gradient);
             }
-    
             .custom-scrollbar::-webkit-scrollbar {
                 width: 6px;
                 height: 6px;
             }
-    
             .custom-scrollbar::-webkit-scrollbar-track {
                 background: #f1f1f1;
                 border-radius: 10px;
             }
-    
             .custom-scrollbar::-webkit-scrollbar-thumb {
                 background: #4ECDC4;
                 border-radius: 10px;
             }
-    
-            /* Updated Modal Styles */
             .modal-content {
                 background: white;
                 border-radius: 20px;
@@ -126,17 +108,14 @@
                 margin: 1rem;
                 position: relative;
             }
-    
             #contentForm .modal-content {
                 max-height: 90vh;
                 overflow-y: auto;
             }
-    
             .floating-input {
                 position: relative;
                 margin-bottom: 1.5rem;
             }
-    
             .floating-input input,
             .floating-input textarea {
                 width: 100%;
@@ -146,7 +125,6 @@
                 outline: none;
                 transition: all 0.3s ease;
             }
-    
             .floating-input label {
                 position: absolute;
                 left: 1rem;
@@ -158,7 +136,6 @@
                 transition: all 0.3s ease;
                 pointer-events: none;
             }
-    
             .floating-input input:focus + label,
             .floating-input input:not(:placeholder-shown) + label,
             .floating-input textarea:focus + label,
@@ -167,13 +144,11 @@
                 font-size: 0.875rem;
                 color: #4ECDC4;
             }
-    
             .floating-input input:focus,
             .floating-input textarea:focus {
                 border-color: #4ECDC4;
                 box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
             }
-    
             .tag {
                 background: rgba(78, 205, 196, 0.1);
                 color: #4ECDC4;
@@ -182,14 +157,12 @@
                 font-size: 0.875rem;
                 font-weight: 500;
             }
-    
             /* Mobile Specific Styles */
             @media (max-width: 640px) {
                 #contentForm {
                     align-items: flex-end !important;
                     padding: 0 !important;
                 }
-    
                 #contentForm .modal-content {
                     width: 100% !important;
                     max-width: 100% !important;
@@ -202,7 +175,6 @@
                     padding-bottom: calc(env(safe-area-inset-bottom) + 1rem) !important;
                     transform: none !important;
                 }
-    
                 .mobile-menu {
                     position: fixed;
                     bottom: 0;
@@ -226,17 +198,13 @@
                     border-radius: 10px;
                     font-size: 0.875rem;
                 }
-    
                 main {
                     padding-bottom: 5rem;
                 }
-    
-                /* Add slide-up animation for modals */
                 #contentForm:not(.hidden) .modal-content {
                     animation: slideUp 0.3s ease-out;
                 }
             }
-    
             .notification {
                 position: fixed;
                 top: 1rem;
@@ -248,24 +216,20 @@
                 z-index: 100;
                 animation: slideIn 0.3s ease;
             }
-    
             @keyframes slideIn {
                 from { transform: translateX(100%); }
                 to { transform: translateX(0); }
             }
-    
             @keyframes slideUp {
                 from { transform: translateY(100%); }
                 to { transform: translateY(0); }
             }
-    
             .reaction-btn {
                 padding: 0.5rem 1rem;
                 border-radius: 10px;
                 transition: all 0.2s ease;
                 background: rgba(78, 205, 196, 0.1);
             }
-    
             .reaction-btn:hover {
                 background: rgba(78, 205, 196, 0.2);
                 transform: scale(1.05);
@@ -274,22 +238,17 @@
                 max-height: 90vh;
                 overflow-y: auto;
             }
-
             #contentDetailModal .prose {
                 white-space: pre-wrap;
                 word-break: break-word;
             }
-
             #contentDetailModal .prose p {
                 margin-bottom: 1rem;
             }
-
-            /* Add smooth scrolling */
             .custom-scrollbar {
                 scrollbar-width: thin;
                 scrollbar-color: #4ECDC4 #f1f1f1;
             }
-
             .spoiler {
                 background-color: #021e1c9f;
                 color: transparent;
@@ -299,17 +258,13 @@
                 user-select: none;
                 transition: all 0.2s ease;
             }
-
             .spoiler:hover {
                 background-color: #4a5568;
             }
-
             .spoiler.revealed {
                 background-color: #e2e8f0;
                 color: inherit;
             }
-    
-            
         </style>
     </head>
 <body class="min-h-screen custom-scrollbar">
@@ -345,7 +300,6 @@
             </div>
         </div>
     </nav>
-
     <!-- Mobile Navigation -->
     <div class="md:hidden mobile-menu">
         <button onclick="toggleSearch()" class="text-gray-600 hover:text-gray-900">
@@ -361,7 +315,6 @@
             🚪 Logout
         </button>
     </div>
-
     <!-- Main Content Area -->
     <main class="container mx-auto px-4 pt-24">
         <div class="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -383,11 +336,8 @@
                 </select>
             </div>
         </div>
-        
-        <!-- Content Grid -->
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" id="contentList"></div>
     </main>
-
     <!-- Modals -->
     <!-- Auth Modal -->
     <div id="authModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -424,8 +374,6 @@
             </form>
         </div>
     </div>
-
-    <!-- Update the content form section in your HTML -->
     <div id="contentForm" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="modal-content w-full max-w-2xl p-6 animate__animated animate__fadeInUp">
             <div class="flex justify-between items-center mb-6">
@@ -465,8 +413,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Content Detail Modal -->
     <div id="contentDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="modal-content w-full max-w-3xl p-6 animate__animated animate__fadeInUp max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
@@ -480,6 +426,11 @@
                     <div id="detailViews" class="text-gray-600"></div>
                     <div id="reactions" class="flex flex-wrap gap-2"></div>
                 </div>
+                <div class="flex justify-between items-center mt-4">
+                    <button onclick="shareContent(event)" class="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition flex items-center gap-2">
+                        📤 Share
+                    </button>
+                </div>
                 <div class="flex justify-between items-center">
                     <div id="detailDate" class="text-sm text-gray-500"></div>
                     <button id="deleteThoughtBtn" onclick="deleteThought()" 
@@ -490,8 +441,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Search Modal -->
     <div id="searchModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="modal-content w-full max-w-2xl p-6 animate__animated animate__fadeInDown">
             <div class="flex justify-between items-center mb-6">
@@ -506,8 +455,6 @@
             <div id="searchResults" class="max-h-96 overflow-y-auto custom-scrollbar divide-y divide-gray-100"></div>
         </div>
     </div>
-
-    <!-- Admin Dashboard Modal -->
     <div id="adminDashboard" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="modal-content w-full max-w-4xl p-6 animate__animated animate__fadeInUp">
             <div class="flex justify-between items-center mb-6">
@@ -534,36 +481,72 @@
             </div>
         </div>
     </div>
-
-    <!-- Keep the same script section from your original code, just update the createContentCard function -->
     <script>
         const API_URL = 'https://backend-7sk4.onrender.com';
         let currentContent = null;
         let isAdmin = false;
         let currentUser = null;
         let authToken = localStorage.getItem('token');
-
-        // Add default tags
+        let currentPage = 1;
+        let isLoading = false;
+        let hasMore = true;
         const defaultTags = ['love', 'life', 'inspiration', 'happiness', 'motivation', 'poetry', 'thoughts', 'emotions'];
-
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             checkAuth();
-            setupContentTypeListener();
+            addLoader();
             setupTagInput();
+            setupInfiniteScroll();
             displayContent();
             handleMobileModal();
+            setupContentTypeListener();
             document.addEventListener('click', (e) => {
                 if (e.target.classList.contains('spoiler')) {
-                    e.stopPropagation(); // Prevent card from opening
+                    e.stopPropagation(); 
                     e.target.classList.toggle('revealed');
                 }
             });
+            document.getElementById('filterType').addEventListener('change', () => {
+                currentPage = 1;
+                hasMore = true;
+                displayContent();
+            });
+            
+            document.getElementById('sortBy').addEventListener('change', () => {
+                currentPage = 1;
+                hasMore = true;
+                displayContent();
+            });
+            
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const thoughtId = urlParams.get('thought');
+            
+            if (thoughtId) {
+                try {
+                    const response = await fetch(`${API_URL}/api/thoughts/${thoughtId}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch thought');
+                    }
+                    const thought = await response.json();
+                    if (!thought) {
+                        throw new Error('Thought not found');
+                    }
+                    // Small delay to ensure DOM is ready
+                    setTimeout(() => {
+                        toggleContentDetail(encodeURIComponent(JSON.stringify(thought)));
+                    }, 100);
+                } catch (error) {
+                    console.error('Error loading shared thought:', error);
+                    showNotification('Unable to load the shared content. It may have been deleted or is no longer available.', 'error');
+                }
+            }
+
+            displayContent();
 
             window.addEventListener('unhandledrejection', event => {
                 handleFetchError(event.reason, 'An unexpected error occurred');
             });
         });
-
         function setupContentTypeListener() {
             const contentType = document.getElementById('contentType');
             const titleInput = document.getElementById('contentTitle');
@@ -583,7 +566,6 @@
                 }
             });
         }
-
         function setupTagInput() {
             const tagContainer = document.createElement('div');
             tagContainer.className = 'mb-4 space-y-2';
@@ -605,7 +587,6 @@
                     `).join('')}
                 </div>
             `;
-
             const contentForm = document.querySelector('#contentForm .space-y-4');
             contentForm.insertBefore(tagContainer, contentForm.querySelector('.floating-input:last-of-type'));
 
@@ -619,7 +600,6 @@
                     if (tag) addTag(tag);
                 }
             });
-
             tagInput.addEventListener('input', () => {
                 const input = tagInput.value.toLowerCase();
                 if (input) {
@@ -639,15 +619,12 @@
                     tagSuggestions.classList.add('hidden');
                 }
             });
-
-            // Hide suggestions when clicking outside
             document.addEventListener('click', (e) => {
                 if (!tagInput.contains(e.target)) {
                     tagSuggestions.classList.add('hidden');
                 }
             });
         }
-
         function addTag(tag) {
             const selectedTags = document.getElementById('selectedTags');
             const tagInput = document.getElementById('tagInput');
@@ -661,23 +638,19 @@
                     </span>
                 `;
             }
-            
             tagInput.value = '';
             document.getElementById('tagSuggestions').classList.add('hidden');
         }
-
         function removeTag(button) {
             button.parentElement.remove();
         }
-
         function getSelectedTags() {
             const tags = [];
             document.querySelectorAll('#selectedTags span').forEach(tag => {
-                tags.push(tag.textContent.trim().slice(1, -1)); // Remove # and × button
+                tags.push(tag.textContent.trim().slice(1, -1)); 
             });
             return tags;
         }
-        // Auth Functions
         function checkAuth() {
             if (authToken) {
                 const payload = parseJwt(authToken);
@@ -686,7 +659,6 @@
                 updateUIForAuth();
             }
         }
-
         function parseJwt(token) {
             try {
                 const base64Url = token.split('.')[1];
@@ -696,7 +668,6 @@
                 return null;
             }
         }
-
         function updateUIForAuth() {
             document.getElementById('userSection').style.display = 'flex';
             document.getElementById('userInfo').textContent = `Welcome, ${currentUser.username}`;
@@ -708,7 +679,6 @@
                 document.getElementById('adminDashboardBtn').classList.remove('hidden');
             }
         }
-
         async function handleAuth(event) {
             event.preventDefault();
             const isLogin = document.getElementById('authButtonText').textContent === 'Login';
@@ -723,7 +693,6 @@
                 data.isAdmin = true;
                 data.adminSecret = document.getElementById('adminSecret').value;
             }
-
             try {
                 const response = await fetch(API_URL + endpoint, {
                     method: 'POST',
@@ -736,7 +705,6 @@
                 if (!response.ok) {
                     throw new Error(await response.text());
                 }
-
                 const { token } = await response.json();
                 localStorage.setItem('token', token);
                 authToken = token;
@@ -747,7 +715,6 @@
                 showNotification(error.message, 'error');
             }
         }
-
         function logout() {
             localStorage.removeItem('token');
             authToken = null;
@@ -755,61 +722,56 @@
             isAdmin = false;
             location.reload();
         }
-
-        // Content Functions
-        async function displayContent() {
+        async function displayContent(append = false) {
+            if (isLoading || (!hasMore && append)) return;
+            
             const contentList = document.getElementById('contentList');
             const filterType = document.getElementById('filterType').value;
             const sortBy = document.getElementById('sortBy').value;
-            
+            const loader = document.getElementById('loader');            
             try {
-                let endpoint = `${API_URL}/api/thoughts`;
-                if (authToken && sortBy === 'recommended') {
-                    endpoint = `${API_URL}/api/thoughts/recommended`;
-                }
-
-                const response = await fetch(endpoint, {
-                    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
-                });
+                isLoading = true;
+                if (loader) loader.style.display = 'block';
                 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!append) {
+                    currentPage = 1;
+                    hasMore = true;
+                    contentList.innerHTML = '';
+                }               
+                let endpoint = `${API_URL}/api/thoughts?page=${currentPage}&limit=9&filterType=${filterType}&sortBy=${sortBy}`;
+                const headers = {};
+                const response = await fetch(endpoint, { headers });               
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);               
+                const data = await response.json();
+                hasMore = data.hasMore;
                 
-                let contents = await response.json();
-                if (!Array.isArray(contents)) throw new Error('Invalid data format received from server');
-
-                let filteredContents = filterType === 'all' ? 
-                    contents : 
-                    contents.filter(content => content.type === filterType);
-
-                if (sortBy !== 'recommended') {
-                    filteredContents.sort((a, b) => {
-                        switch(sortBy) {
-                            case 'oldest': return new Date(a.timestamp) - new Date(b.timestamp);
-                            case 'popular': return (b.views || 0) - (a.views || 0);
-                            default: return new Date(b.timestamp) - new Date(a.timestamp);
-                        }
-                    });
+                if (data.thoughts.length === 0 && !append) {
+                    contentList.innerHTML = createEmptyState();
+                    return;
                 }
-
-                contentList.innerHTML = filteredContents.length ? 
-                    filteredContents.map(content => createContentCard(content)).join('') :
-                    createEmptyState();
-
+                
+                const newContent = data.thoughts.map(content => createContentCard(content)).join('');
+                if (append) {
+                    contentList.insertAdjacentHTML('beforeend', newContent);
+                } else {
+                    contentList.innerHTML = newContent;
+                }
+                
             } catch (error) {
                 handleFetchError(error, 'Failed to load content');
-                contentList.innerHTML = createErrorState();
+                if (!append) {
+                    contentList.innerHTML = createErrorState();
+                }
+            } finally {
+                isLoading = false;
+                if (loader) loader.style.display = 'none';
             }
         }
-
-
-        
-
         async function saveContent() {
             if (!authToken) {
                 showNotification('Please login to share content', 'error');
                 return;
             }
-
             const type = document.getElementById('contentType').value;
             const title = document.getElementById('contentTitle').value.trim();
             const text = document.getElementById('contentText').value.trim();
@@ -817,28 +779,22 @@
             const tags = getSelectedTags();
 
             try {
-                // Validate content length
                 validateContent(text);
-
                 if ((type === 'story' || type === 'poem') && !title) {
                     throw new Error('Title is required for stories and poems');
                 }
-
                 if (!text) {
                     throw new Error('Content text is required');
                 }
-
                 if (text.length < 10) {
                     throw new Error('Content must be at least 10 characters long');
                 }
-
                 if (tags.length === 0) {
                     throw new Error('Please add at least one tag');
                 }
-
                 const content = {
                     title: title || 'Untitled',
-                    text: formatText(text), // Format text before saving
+                    text: formatText(text),
                     type,
                     author,
                     tags,
@@ -851,7 +807,6 @@
                     }),
                     timestamp: Date.now()
                 };
-                
                 const response = await fetch(`${API_URL}/api/thoughts`, {
                     method: 'POST',
                     headers: {
@@ -865,16 +820,11 @@
                     const error = await response.json();
                     throw new Error(error.message || 'Failed to save content');
                 }
-                
                 const savedContent = await response.json();
-                
-                // Clear form and reset UI
                 document.getElementById('contentTitle').value = '';
                 document.getElementById('contentText').value = '';
                 document.getElementById('authorNickname').value = '';
                 document.getElementById('selectedTags').innerHTML = '';
-                
-                
                 toggleNewContent();
                 await displayContent();
                 showNotification('Your thought has been shared successfully!', 'success');
@@ -884,9 +834,6 @@
                 showNotification(error.message, 'error');
             }
         }
-
-
-
         function createEmptyState() {
             const isLoggedIn = !!authToken;
             return `
@@ -904,8 +851,6 @@
                 </div>
             `;
         }
-
-        // Modified deleteThought function
         async function deleteThought(thoughtId) {
             if (!isAdmin) return;
             
@@ -919,14 +864,12 @@
                         'Authorization': `Bearer ${authToken}`
                     }
                 });
-
                 if (!response.ok) throw new Error('Failed to delete content');
 
                 if (thoughtId) {
-                    // If called from dashboard
                     loadAdminDashboard();
                 } else {
-                    // If called from content detail
+
                     toggleContentDetail();
                 }
                 
@@ -936,8 +879,6 @@
                 showNotification(error.message, 'error');
             }
         }
-
-        // Reaction handling
         async function addReaction(emoji) {
             if (!authToken) {
                 showNotification('Please login to react to posts', 'error');
@@ -971,27 +912,20 @@
                 showNotification(error.message, 'error');
             }
         }
-
-        // Admin Dashboard
         async function loadAdminDashboard() {
             if (!isAdmin) return;
-
             try {
                 const response = await fetch(`${API_URL}/api/admin/dashboard`, {
                     headers: {
                         'Authorization': `Bearer ${authToken}`
                     }
                 });
-
                 if (!response.ok) throw new Error('Failed to load dashboard data');
-
                 const data = await response.json();
-                
                 document.getElementById('totalThoughts').textContent = data.totalThoughts;
                 document.getElementById('totalUsers').textContent = data.totalUsers;
                 document.getElementById('latestActivity').textContent = 
                     `Latest thought posted ${new Date(data.recentThoughts[0]?.timestamp).toLocaleString()}`;
-
                 document.getElementById('recentThoughts').innerHTML = data.recentThoughts
                     .map(thought => `
                         <div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center">
@@ -1011,8 +945,6 @@
                 showNotification(error.message, 'error');
             }
         }
-
-        // UI Toggles and Utilities
         function toggleAuthModal() {
             const modal = document.getElementById('authModal');
             modal.classList.toggle('hidden');
@@ -1020,7 +952,6 @@
                 document.getElementById('username').focus();
             }
         }
-
         function toggleAuthMode() {
             const isLogin = document.getElementById('authButtonText').textContent === 'Login';
             document.getElementById('authTitle').textContent = isLogin ? 'Register' : 'Login';
@@ -1029,13 +960,11 @@
             document.getElementById('adminFields').classList.add('hidden');
             document.getElementById('isAdmin').checked = false;
         }
-
         function toggleAdminFields() {
             const adminFields = document.getElementById('adminFields');
             const isAdmin = document.getElementById('isAdmin').checked;
             adminFields.classList.toggle('hidden', !isAdmin);
         }
-
         function toggleNewContent() {
             const contentForm = document.getElementById('contentForm');
             const isHidden = contentForm.classList.contains('hidden');
@@ -1047,14 +976,12 @@
             } else {
                 document.body.style.overflow = '';
                 contentForm.classList.add('hidden');
-                // Clear form
                 document.getElementById('contentTitle').value = '';
                 document.getElementById('contentText').value = '';
                 document.getElementById('authorNickname').value = '';
                 
             }
         }
-
         function toggleContentDetail(contentString) {
             const modal = document.getElementById('contentDetailModal');
             
@@ -1063,27 +990,45 @@
                     const decodedString = decodeURIComponent(contentString).replace(/\+/g, ' ');
                     currentContent = JSON.parse(decodedString);
                     
-                    if (!currentContent || !currentContent.title || !currentContent.text) {
-                        throw new Error('Invalid content data');
+                    // Validate the content object
+                    if (!currentContent || typeof currentContent !== 'object') {
+                        throw new Error('Invalid content format');
                     }
+
+                    // Check for required fields
+                    if (!currentContent.text) {
+                        throw new Error('Content is missing required fields');
+                    }
+
+                    // If no title, set a default
+                    currentContent.title = currentContent.title || 'Untitled';
                     
                     updateDetailView();
-                    // Only increment views if user is authenticated and modal is being opened
+                    
+                    // Update view count if necessary
                     if (currentContent._id && authToken && modal.classList.contains('hidden')) {
                         incrementViews(currentContent._id);
                     }
+                    
+                    // Update URL without reloading the page
+                    const newUrl = currentContent._id ? 
+                        `${window.location.pathname}?thought=${currentContent._id}` : 
+                        window.location.pathname;
+                    window.history.pushState({}, '', newUrl);
+                    
                 } catch (error) {
                     console.error('Error parsing content:', error);
-                    showNotification('Error loading content details. Please try again.', 'error');
+                    showNotification('Unable to load the content. Please try again.', 'error');
                     return;
                 }
+            } else {
+                // Clear the URL parameter when closing the modal
+                window.history.pushState({}, '', window.location.pathname);
             }
             
             modal.classList.toggle('hidden');
             document.body.style.overflow = modal.classList.contains('hidden') ? '' : 'hidden';
         }
-
-
         function toggleAdminDashboard() {
             const dashboard = document.getElementById('adminDashboard');
             dashboard.classList.toggle('hidden');
@@ -1091,7 +1036,6 @@
                 loadAdminDashboard();
             }
         }
-
         function toggleSearch() {
             const modal = document.getElementById('searchModal');
             modal.classList.toggle('hidden');
@@ -1099,9 +1043,6 @@
                 document.getElementById('searchInput').focus();
             }
         }
-
-        
-        // Search functionality
         function searchContent() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const resultsContainer = document.getElementById('searchResults');
@@ -1110,7 +1051,6 @@
                 resultsContainer.innerHTML = '';
                 return;
             }
-
             fetch(`${API_URL}/api/thoughts`)
                 .then(response => response.json())
                 .then(contents => {
@@ -1131,21 +1071,16 @@
                 })
                 .catch(error => handleFetchError(error, 'Search failed'));
         }
-
         function updateDetailView() {
             if (!currentContent) return;
-
             try {
-                // Safely update UI elements with content validation
                 const detailTitle = document.getElementById('detailTitle');
                 const detailMetadata = document.getElementById('detailMetadata');
                 const detailContent = document.getElementById('detailContent');
                 const detailViews = document.getElementById('detailViews');
                 const detailDate = document.getElementById('detailDate');
                 const deleteThoughtBtn = document.getElementById('deleteThoughtBtn');
-
                 if (detailTitle) detailTitle.textContent = currentContent.title || 'Untitled';
-                
                 if (detailMetadata) {
                     detailMetadata.innerHTML = `
                         <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">
@@ -1154,50 +1089,39 @@
                         <span>By ${escapeHtml(currentContent.author || 'Anonymous')}</span>
                     `;
                 }
-
-            
                 if (detailContent) {
                     const sanitizedText = escapeHtml(currentContent.text || '');
                     const processedText = processSpoilerText(sanitizedText);
                     detailContent.innerHTML = marked.parse(processedText);
-                    
-                    // Add click handlers for spoiler texts
                     detailContent.querySelectorAll('.spoiler').forEach(spoiler => {
                         spoiler.addEventListener('click', (e) => {
-                            e.stopPropagation(); // Prevent modal from closing
+                            e.stopPropagation(); 
                             spoiler.classList.toggle('revealed');
                         });
                     });
                 }
-
                 if (detailViews) {
                     detailViews.innerHTML = `👁️ ${currentContent.views || 0} views`;
                 }
-
                 if (detailDate) {
                     detailDate.textContent = currentContent.date || new Date().toLocaleString();
                 }
-
                 if (deleteThoughtBtn) {
                     deleteThoughtBtn.classList.toggle('hidden', !isAdmin);
                 }
-
                 setupReactions(currentContent);
             } catch (error) {
                 console.error('Error updating detail view:', error);
                 showNotification('Error displaying content details', 'error');
             }
         }
-
         function setupReactions(content) {
             const reactions = document.getElementById('reactions');
             const emojis = ['👍', '❤️', '😂', '😮', '😢'];
-            
             reactions.innerHTML = emojis.map(emoji => {
                 const reactionList = content.reactions && content.reactions[emoji] || [];
                 const hasReacted = reactionList.some(r => r.userId === currentUser?.id);
                 const count = reactionList.length;
-                
                 return `
                     <button onclick="addReaction('${emoji}')"
                             class="emoji-reaction px-3 py-1 rounded-lg ${hasReacted ? 'bg-teal-100' : 'bg-gray-100'} 
@@ -1208,20 +1132,16 @@
                 `;
             }).join('');
         }
-
         async function incrementViews(thoughtId) {
-            if (!thoughtId || !authToken) return; // Add authToken check
-            
+            if (!thoughtId || !authToken) return; 
             try {
                 const response = await fetch(`${API_URL}/api/thoughts/${thoughtId}/view`, {
                     method: 'PATCH',
                     headers: {
-                        'Authorization': `Bearer ${authToken}` // Add auth header
+                        'Authorization': `Bearer ${authToken}` 
                     }
                 });
-                
                 if (!response.ok) throw new Error('Failed to update views');
-                
                 const updated = await response.json();
                 if (currentContent) {
                     currentContent.views = updated.views;
@@ -1229,8 +1149,6 @@
                     if (detailViews) {
                         detailViews.innerHTML = `👁️ ${updated.views} views`;
                     }
-                    
-                    // Also update the view count in the content card if it exists
                     const cardViews = document.querySelector(`[data-thought-id="${thoughtId}"] .view-count`);
                     if (cardViews) {
                         cardViews.textContent = `👁️ ${updated.views}`;
@@ -1240,9 +1158,6 @@
                 console.error('Error updating views:', error);
             }
         }
-
-
-
         function createErrorState() {
             return `
                 <div class="col-span-full flex flex-col items-center justify-center p-8 text-gray-500">
@@ -1252,7 +1167,6 @@
                 </div>
             `;
         }
-
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg animate__animated animate__fadeIn z-50 ${
@@ -1265,12 +1179,10 @@
                 setTimeout(() => notification.remove(), 500);
             }, 3000);
         }
-
         function handleFetchError(error, defaultMessage) {
             console.error('API Error:', error);
             showNotification(error.message || defaultMessage, 'error');
         }
-
         function escapeHtml(unsafe) {
             return unsafe
                 .replace(/&/g, "&amp;")
@@ -1279,14 +1191,12 @@
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
-
         function createContentCard(content) {
             try {
                 if (!content || typeof content !== 'object') {
                     console.error('Invalid content object:', content);
                     return '';
                 }
-
                 const title = content.title || 'Untitled';
                 const text = content.text || '';
                 const type = content.type || 'thought';
@@ -1296,7 +1206,7 @@
                 const tags = Array.isArray(content.tags) ? content.tags : [];
 
                 const formattedText = formatText(text);
-                const truncatedText = truncateText(formattedText, 150); // Reduced character limit
+                const truncatedText = truncateText(formattedText, 150);
             
                 const processedText = typeof marked === 'function' 
                     ? marked(processSpoilerText(escapeHtml(truncatedText)))
@@ -1344,7 +1254,6 @@
             }
         }
 
-        // Add this new function for mobile UI updates
         function updateMobileUI(isAuthenticated) {
                 const mobileShareBtn = document.getElementById('mobileShareBtn');
                 const mobileAuthBtn = document.getElementById('mobileAuthBtn');
@@ -1360,15 +1269,11 @@
                     mobileLogoutBtn.classList.add('hidden');
                 }
             }
-
-            // Update your updateUIForAuth function to include mobile UI
             const originalUpdateUIForAuth = updateUIForAuth;
             updateUIForAuth = function() {
                 originalUpdateUIForAuth();
                 updateMobileUI(true);
             }
-
-            // Update your logout function to include mobile UI
             const originalLogout = logout;
             logout = function() {
                 originalLogout();
@@ -1397,32 +1302,21 @@
                 document.getElementById('authorNickname').value = '';
                 
             }
-
-            // Close modal when clicking outside
             contentForm.addEventListener('click', (e) => {
                 if (e.target === contentForm) {
                     closeModal();
                 }
             });
-
-            // Prevent modal content clicks from bubbling up
             modalContent.addEventListener('click', (e) => {
                 e.stopPropagation();
             });
-
-            // Handle share button click
             document.getElementById('mobileShareBtn').addEventListener('click', openModal);
             document.getElementById('shareBtn').addEventListener('click', openModal);
-
-            // Handle modal close button
             const closeButton = modalContent.querySelector('button[onclick="toggleNewContent()"]');
             if (closeButton) {
                 closeButton.addEventListener('click', closeModal);
             }
         }
-
-
-        // Call this function when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             checkAuth();
             displayContent();
@@ -1430,16 +1324,12 @@
             window.addEventListener('unhandledrejection', event => {
                 handleFetchError(event.reason, 'An unexpected error occurred');
             });
-        });
-
-        
+        }); 
         document.getElementById('sortBy').innerHTML = `
             <option value="newest">Latest</option>
             <option value="oldest">Oldest</option>
             <option value="popular">Popular</option>
-            ${authToken ? '<option value="recommended">Recommended</option>' : ''}
         `;
-
         function truncateText(text, maxLength = 300) {
             if (text.length <= maxLength) return text;
             return text.substr(0, maxLength).trim() + '...';
@@ -1447,7 +1337,6 @@
         function processSpoilerText(text) {
             return text.replace(/\|\|(.*?)\|\|/g, '<span class="spoiler">$1</span>');
         }
-        
         function formatText(text) {
             return text
                 .split('\n')
@@ -1456,7 +1345,6 @@
                 .join('\n')
                 .replace(/\n{3,}/g, '\n\n'); 
         }
-
         function validateContent(text) {
             const wordCount = text.trim().split(/\s+/).length;
             const MAX_WORDS = 10000;
@@ -1467,7 +1355,90 @@
             
             return text;
         }
+        function setupInfiniteScroll() {
+            const options = {
+                root: null,
+                rootMargin: '100px',
+                threshold: 0.1
+            };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !isLoading && hasMore) {
+                        currentPage++;
+                        displayContent(true);
+                    }
+                });
+            }, options);
+            const sentinel = document.createElement('div');
+            sentinel.id = 'sentinel';
+            sentinel.style.height = '1px';
+            document.getElementById('contentList').after(sentinel);
+            observer.observe(sentinel);
+        }
+        function addLoader() {
+            const loaderHtml = `
+                <div id="loader" class="hidden col-span-full flex justify-center p-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+                </div>
+            `;
+            document.getElementById('contentList').insertAdjacentHTML('afterend', loaderHtml);
+        }
+        function animateCards() {
+            const cards = document.querySelectorAll('.content-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.remove('opacity-0');
+                }, index * 100);
+            });
+        }
+        const originalDisplayContent = displayContent;
+        displayContent = async function(append = false) {
+            await originalDisplayContent(append);
+            animateCards();
+        };
+        async function shareContent(event) {
+            event.stopPropagation();
+            
+            if (!currentContent || !currentContent._id) {
+                showNotification('Unable to share this content', 'error');
+                return;
+            }
 
+            const shareUrl = `${window.location.origin}${window.location.pathname}?thought=${currentContent._id}`;
+            
+            try {
+                if (navigator.share) {
+                    await navigator.share({
+                        title: currentContent.title || 'Shared Thought',
+                        text: (currentContent.text || '').substring(0, 100) + '...',
+                        url: shareUrl
+                    });
+                    showNotification('Shared successfully!', 'success');
+                } else {
+                    copyToClipboard(shareUrl);
+                }
+            } catch (error) {
+                console.error('Sharing failed:', error);
+                // Fallback to clipboard copy if sharing fails
+                copyToClipboard(shareUrl);
+            }
+        }
+        function copyToClipboard(text) {
+            const input = document.createElement('input');
+            input.style.position = 'fixed';
+            input.style.opacity = 0;
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            input.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showNotification('Link copied to clipboard!', 'success');
+            } catch (err) {
+                showNotification('Failed to copy link', 'error');
+            }
+            document.body.removeChild(input);
+        }
     </script>
 </body>
 </html>
