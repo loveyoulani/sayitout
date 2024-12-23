@@ -12,110 +12,138 @@
                 --primary-gradient: linear-gradient(135deg, #FF6B6B, #4ECDC4);
                 --secondary-gradient: linear-gradient(135deg, #6B66FF, #4ECDC4);
             }
+
             body {
                 background-color: #F0F4F8;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
                 min-height: 100vh;
                 padding-bottom: env(safe-area-inset-bottom);
+                line-height: 1.5;
+                overflow-y: auto;
             }
+
+            /* Enhanced Scrollbar Styles */
+            * {
+                scrollbar-width: thin;
+                scrollbar-color: #4ECDC4 #f1f1f1;
+            }
+
+            *::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+
+            *::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+
+            *::-webkit-scrollbar-thumb {
+                background: #4ECDC4;
+                border-radius: 10px;
+                border: 2px solid #f1f1f1;
+            }
+
+            *::-webkit-scrollbar-thumb:hover {
+                background: #3dbdb5;
+            }
+
             .glass-nav {
                 background: rgba(255, 255, 255, 0.95);
                 backdrop-filter: blur(10px);
                 -webkit-backdrop-filter: blur(10px);
                 border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             }
+
             .content-card {
                 display: flex;
                 flex-direction: column;
                 height: 100%;
                 min-height: 200px;
                 max-height: 280px;
-                overflow: hidden;
+                overflow-y: auto;
                 background: white;
                 border: 1px solid #e2e8f0;
                 border-radius: 1rem;
                 transition: all 0.3s ease;
             }
+
             .content-card:hover {
                 transform: translateY(-5px);
                 box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
                 border-color: #6B66FF;
             }
+
             .content-preview {
                 position: relative;
                 max-height: 100px;
-                overflow: hidden;
+                overflow-y: auto;
                 margin-bottom: 1rem;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                padding-right: 8px; /* Added to prevent content from touching scrollbar */
             }
+
             .content-preview::after {
                 content: '';
                 position: absolute;
                 bottom: 0;
                 left: 0;
-                right: 0;
+                right: 8px; /* Adjusted to account for scrollbar */
                 height: 40px;
                 background: linear-gradient(to bottom, transparent, white);
+                pointer-events: none;
             }
+
             .title-clamp {
                 display: -webkit-box;
                 -webkit-box-orient: vertical;
                 overflow: hidden;
                 -webkit-line-clamp: 1;
-                line-height: 1.5;
+                line-height: 1.3;
+                color: #000000;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
             }
+
             .text-clamp {
                 display: -webkit-box;
                 -webkit-box-orient: vertical;
                 overflow: hidden;
                 -webkit-line-clamp: 3;
                 line-height: 1.5;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
             }
-            .content-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-                border-color: #6B66FF;
+
+            .content-card h2 {
+                font-size: 18px;
+                color: #000000;
+                margin-bottom: 0.5rem;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
             }
+
             .gradient-text {
                 background: var(--primary-gradient);
                 -webkit-background-clip: text;
                 background-clip: text;
                 color: transparent;
             }
+
             .gradient-bg {
                 background: var(--primary-gradient);
             }
+
             .secondary-gradient-bg {
                 background: var(--secondary-gradient);
             }
-            .custom-scrollbar::-webkit-scrollbar {
-                width: 6px;
-                height: 6px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 10px;
-            }
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-                background: #4ECDC4;
-                border-radius: 10px;
-            }
-            .modal-content {
-                background: white;
-                border-radius: 20px;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-                width: calc(100% - 2rem);
-                max-width: 42rem;
-                margin: 1rem;
-                position: relative;
-            }
-            #contentForm .modal-content {
-                max-height: 90vh;
-                overflow-y: auto;
-            }
+
             .floating-input {
                 position: relative;
                 margin-bottom: 1.5rem;
             }
+
             .floating-input input,
             .floating-input textarea {
                 width: 100%;
@@ -124,7 +152,10 @@
                 border-radius: 10px;
                 outline: none;
                 transition: all 0.3s ease;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
             }
+
             .floating-input label {
                 position: absolute;
                 left: 1rem;
@@ -136,6 +167,7 @@
                 transition: all 0.3s ease;
                 pointer-events: none;
             }
+
             .floating-input input:focus + label,
             .floating-input input:not(:placeholder-shown) + label,
             .floating-input textarea:focus + label,
@@ -144,11 +176,13 @@
                 font-size: 0.875rem;
                 color: #4ECDC4;
             }
+
             .floating-input input:focus,
             .floating-input textarea:focus {
                 border-color: #4ECDC4;
                 box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
             }
+
             .tag {
                 background: rgba(78, 205, 196, 0.1);
                 color: #4ECDC4;
@@ -157,24 +191,134 @@
                 font-size: 0.875rem;
                 font-weight: 500;
             }
+
+            .modal-content {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                width: calc(100% - 2rem);
+                max-width: 42rem;
+                margin: 1rem;
+                position: relative;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            #contentForm .modal-content {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .notification {
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                background: white;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                z-index: 100;
+                animation: slideIn 0.3s ease;
+            }
+
+            .reaction-btn {
+                padding: 0.5rem 1rem;
+                border-radius: 10px;
+                transition: all 0.2s ease;
+                background: rgba(78, 205, 196, 0.1);
+            }
+
+            .reaction-btn:hover {
+                background: rgba(78, 205, 196, 0.2);
+                transform: scale(1.05);
+            }
+
+            .spoiler {
+                background-color: #021e1c9f;
+                color: transparent;
+                padding: 0 4px;
+                border-radius: 4px;
+                cursor: pointer;
+                user-select: none;
+                transition: all 0.2s ease;
+            }
+
+            .spoiler:hover {
+                background-color: #4a5568;
+            }
+
+            .spoiler.revealed {
+                background-color: #e2e8f0;
+                color: inherit;
+            }
+
+            .prose {
+                font-size: 15px;
+                line-height: 1.5;
+                color: #374151;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                padding-right: 8px; /* Added for scrollbar space */
+            }
+
+            .prose p {
+                margin-bottom: 1rem;
+            }
+
+            .thought, .chat {
+                max-width: 100%;
+                word-break: break-word;
+                overflow-wrap: break-word;
+                white-space: pre-wrap;
+                padding: 1rem;
+                margin: 0.5rem 0;
+                border-radius: 1rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                overflow-y: auto;
+            }
+
+            .thought {
+                background-color: #f3f4f6;
+                border: 1px solid #e5e7eb;
+            }
+
+            .content-container {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                padding: 1rem;
+                overflow-y: auto;
+            }
+
+            .thought *, .chat * {
+                max-width: 100%;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
+            }
+
+            .metadata {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+                font-size: 0.875rem;
+                color: #6b7280;
+            }
+
             /* Mobile Specific Styles */
             @media (max-width: 640px) {
-                #contentForm {
-                    align-items: flex-end !important;
-                    padding: 0 !important;
+                .content-card h2 {
+                    font-size: 16px;
+                    color: #000000;
                 }
-                #contentForm .modal-content {
-                    width: 100% !important;
-                    max-width: 100% !important;
-                    margin: 0 !important;
-                    border-bottom-left-radius: 0 !important;
-                    border-bottom-right-radius: 0 !important;
-                    border-top-left-radius: 20px !important;
-                    border-top-right-radius: 20px !important;
-                    max-height: 85vh !important;
-                    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem) !important;
-                    transform: none !important;
+                
+                .content-card .prose {
+                    font-size: 14px;
                 }
+                
                 .mobile-menu {
                     position: fixed;
                     bottom: 0;
@@ -190,7 +334,7 @@
                     z-index: 50;
                     border-top: 1px solid rgba(0, 0, 0, 0.05);
                 }
-    
+                
                 .mobile-menu button {
                     flex: 1;
                     margin: 0 0.25rem;
@@ -198,75 +342,75 @@
                     border-radius: 10px;
                     font-size: 0.875rem;
                 }
+                
+                #contentForm {
+                    align-items: flex-end !important;
+                    padding: 0 !important;
+                }
+                
+                #contentForm .modal-content {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    margin: 0 !important;
+                    border-bottom-left-radius: 0 !important;
+                    border-bottom-right-radius: 0 !important;
+                    border-top-left-radius: 20px !important;
+                    border-top-right-radius: 20px !important;
+                    max-height: 85vh !important;
+                    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem) !important;
+                }
+                
+                #contentDetailModal .modal-content {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    width: 100%;
+                    height: 100%;
+                    margin: 0;
+                    border-radius: 0;
+                    padding: 1.25rem;
+                }
+                
+                #contentDetailModal #detailTitle {
+                    font-size: 20px;
+                    color: #000000;
+                    line-height: 1.3;
+                    margin-bottom: 1rem;
+                }
+                
+                #contentDetailModal #detailContent {
+                    font-size: 15px;
+                    line-height: 1.5;
+                    padding: 0;
+                }
+                
+                #contentDetailModal #detailMetadata {
+                    font-size: 14px;
+                    margin-bottom: 1.25rem;
+                }
+                
+                #contentDetailModal .prose {
+                    padding: 0;
+                }
+                
                 main {
                     padding-bottom: 5rem;
                 }
-                #contentForm:not(.hidden) .modal-content {
-                    animation: slideUp 0.3s ease-out;
-                }
             }
-            .notification {
-                position: fixed;
-                top: 1rem;
-                right: 1rem;
-                padding: 1rem 1.5rem;
-                border-radius: 10px;
-                background: white;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                z-index: 100;
-                animation: slideIn 0.3s ease;
-            }
+
             @keyframes slideIn {
                 from { transform: translateX(100%); }
                 to { transform: translateX(0); }
             }
+
             @keyframes slideUp {
                 from { transform: translateY(100%); }
                 to { transform: translateY(0); }
             }
-            .reaction-btn {
-                padding: 0.5rem 1rem;
-                border-radius: 10px;
-                transition: all 0.2s ease;
-                background: rgba(78, 205, 196, 0.1);
-            }
-            .reaction-btn:hover {
-                background: rgba(78, 205, 196, 0.2);
-                transform: scale(1.05);
-            }
-            #contentDetailModal .modal-content {
-                max-height: 90vh;
-                overflow-y: auto;
-            }
-            #contentDetailModal .prose {
-                white-space: pre-wrap;
-                word-break: break-word;
-            }
-            #contentDetailModal .prose p {
-                margin-bottom: 1rem;
-            }
-            .custom-scrollbar {
-                scrollbar-width: thin;
-                scrollbar-color: #4ECDC4 #f1f1f1;
-            }
-            .spoiler {
-                background-color: #021e1c9f;
-                color: transparent;
-                padding: 0 4px;
-                border-radius: 4px;
-                cursor: pointer;
-                user-select: none;
-                transition: all 0.2s ease;
-            }
-            .spoiler:hover {
-                background-color: #4a5568;
-            }
-            .spoiler.revealed {
-                background-color: #e2e8f0;
-                color: inherit;
-            }
-        </style>
-    </head>
+    </style>
+</head>
 <body class="min-h-screen custom-scrollbar">
     <!-- Navigation -->
     <nav class="fixed w-full z-50 glass-nav">
@@ -1047,10 +1191,14 @@
                 resultsContainer.innerHTML = '';
                 return;
             }
+
             fetch(`${API_URL}/api/thoughts`)
                 .then(response => response.json())
-                .then(contents => {
-                    const filtered = contents.filter(content =>
+                .then(data => {
+                    // Extract thoughts array from paginated response
+                    const thoughts = data.thoughts || [];
+                    
+                    const filtered = thoughts.filter(content =>
                         content.title.toLowerCase().includes(searchTerm) ||
                         content.text.toLowerCase().includes(searchTerm)
                     );
@@ -1058,7 +1206,7 @@
                     resultsContainer.innerHTML = filtered.length ?
                         filtered.map(content => `
                             <div class="p-4 border-b cursor-pointer hover:bg-gray-50 transition"
-                                 onclick="toggleSearch(); toggleContentDetail('${encodeURIComponent(JSON.stringify(content))}')">
+                                onclick="toggleSearch(); toggleContentDetail('${encodeURIComponent(JSON.stringify(content))}')">
                                 <h3 class="font-bold">${escapeHtml(content.title)}</h3>
                                 <p class="text-sm text-gray-600">${escapeHtml(content.text.substring(0, 100))}...</p>
                             </div>
@@ -1334,13 +1482,59 @@
             return text.replace(/\|\|(.*?)\|\|/g, '<span class="spoiler">$1</span>');
         }
         function formatText(text) {
-            return text
-                .split('\n')
-                .map(line => line.trim())
-                .filter(line => line.length > 0)
+            // First, normalize line endings and remove any excessive whitespace
+            const normalizedText = text.replace(/\r\n/g, '\n')
+                                    .replace(/\n{3,}/g, '\n\n')
+                                    .trim();
+            
+            const lines = normalizedText.split('\n');
+            const formattedLines = [];
+            const LONG_LINE_THRESHOLD = 100;
+            const NATURAL_BREAK_MARKERS = [
+                '?', '!', '.', // Basic sentence endings
+                '...', // Ellipsis
+                '—', '-', // Dashes
+                ':)', ':(', // Basic emojis
+                'BUT', 'AND', 'BECAUSE', // Emphasis words often starting new thoughts
+            ];
+            
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                
+                // Skip if line is empty
+                if (line.length === 0) continue;
+                
+                // Add line to formatted output
+                formattedLines.push(line);
+                
+                // Determine if we need a paragraph break
+                const needsBreak = (
+                    // Check if current line ends with a break marker
+                    NATURAL_BREAK_MARKERS.some(marker => 
+                        line.toUpperCase().endsWith(marker) ||
+                        line.toUpperCase().includes(marker + ' ')
+                    ) ||
+                    // Check if line is long
+                    line.length > LONG_LINE_THRESHOLD ||
+                    // Check if next line starts with an emphasis word
+                    (lines[i + 1] && NATURAL_BREAK_MARKERS.some(marker =>
+                        lines[i + 1].toUpperCase().startsWith(marker)
+                    ))
+                );
+                
+                // Add paragraph break if needed and not at the end
+                if (needsBreak && i < lines.length - 1) {
+                    formattedLines.push('');
+                }
+            }
+            
+            // Join lines and ensure consistent paragraph spacing
+            return formattedLines
                 .join('\n')
-                .replace(/\n{3,}/g, '\n\n'); 
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
         }
+        
         function validateContent(text) {
             const wordCount = text.trim().split(/\s+/).length;
             const MAX_WORDS = 10000;
