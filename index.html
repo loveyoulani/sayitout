@@ -760,7 +760,6 @@ body {
                         </div>
                     `).join('');
                     
-                    // Update dropdown background color when showing
                     tagSuggestions.classList.remove('hidden');
                     tagSuggestions.style.backgroundColor = '#15202B';
                     tagSuggestions.style.borderColor = '#192734';
@@ -787,10 +786,12 @@ body {
 
             if (!tags.includes(tag) && tags.length < 5) {
                 selectedTags.innerHTML += `
-                    <a href="#" onclick="return false;" 
-                    class="inline-block px-3 py-1 bg-[#192734] text-white rounded-full hover:bg-[#253341] transition-colors">
+                    <div class="inline-flex items-center px-3 py-1 bg-[#192734] text-white rounded-full hover:bg-[#253341] transition-colors">
                         #${tag}
-                    </a>
+                        <button onclick="removeTag(this)" class="ml-2 text-xs hover:text-red-400" aria-label="Remove tag">
+                            ×
+                        </button>
+                    </div>
                 `;
             }
             tagInput.value = '';
@@ -799,8 +800,10 @@ body {
 
         function getSelectedTags() {
             const tags = [];
-            document.querySelectorAll('#selectedTags a').forEach(tag => {
-                tags.push(tag.textContent.trim().slice(1));
+            document.querySelectorAll('#selectedTags div').forEach(tag => {
+                // Get the text content but exclude the × symbol
+                const tagText = tag.textContent.trim().replace('×', '');
+                tags.push(tagText.slice(1));
             });
             return tags;
         }
@@ -1247,38 +1250,108 @@ body {
                 const detailMetadata = document.getElementById('detailMetadata');
                 const detailContent = document.getElementById('detailContent');
                 const detailViews = document.getElementById('detailViews');
-                const detailDate = document.getElementById('detailDate');
                 const deleteThoughtBtn = document.getElementById('deleteThoughtBtn');
-                if (detailTitle) detailTitle.textContent = currentContent.title || 'Untitled';
+                const detailTags = document.getElementById('detailTags');
+
+                // Format date properly
+                const formatDate = (dateString) => {
+                    try {
+                        if (!dateString) return new Date().toLocaleString();
+                        const date = new Date(dateString);
+                        if (isNaN(date.getTime())) return new Date().toLocaleString();
+                        return date.toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                    } catch (err) {
+                        return new Date().toLocaleString();
+                    }
+                };
+
+                // Title
+                if (detailTitle) {
+                    detailTitle.className = 'text-2xl font-bold mb-4 text-white';
+                    detailTitle.textContent = currentContent.title || 'Untitled';
+                }
+
+                // Metadata with fixed colors
                 if (detailMetadata) {
+                    detailMetadata.className = 'flex flex-wrap items-center gap-3 mb-6';
                     detailMetadata.innerHTML = `
-                        <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">
+                        <span class="px-3 py-1 rounded-full bg-[#192734] text-[#4DDFC6] border border-[#253341]">
                             ${escapeHtml(currentContent.type || 'thought')}
                         </span>
-                        <span>By ${escapeHtml(currentContent.author || 'Anonymous')}</span>
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+                                </svg>
+                                <span class="text-gray-400 text-sm">
+                                    ${escapeHtml(currentContent.author || 'Anonymous')}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"/>
+                                </svg>
+                                <span class="text-gray-400 text-sm">
+                                    ${formatDate(currentContent.date)}
+                                </span>
+                            </div>
+                        </div>
                     `;
                 }
+
+                // Tags section
+                if (detailTags && currentContent.tags && currentContent.tags.length > 0) {
+                    detailTags.className = 'flex flex-wrap gap-2 mb-4';
+                    detailTags.innerHTML = currentContent.tags.map(tag => `
+                        <span class="text-[#00b4ff] text-sm font-medium hover:opacity-80 cursor-pointer">
+                            #${escapeHtml(tag)}
+                        </span>
+                    `).join('');
+                }
+
+                // Content with updated colors
                 if (detailContent) {
                     const sanitizedText = escapeHtml(currentContent.text || '');
                     const processedText = processSpoilerText(sanitizedText);
+                    detailContent.className = 'prose max-w-none mb-6 text-gray-200';
                     detailContent.innerHTML = marked.parse(processedText);
+                    
+                    // Spoiler functionality
                     detailContent.querySelectorAll('.spoiler').forEach(spoiler => {
                         spoiler.addEventListener('click', (e) => {
-                            e.stopPropagation(); 
+                            e.stopPropagation();
                             spoiler.classList.toggle('revealed');
                         });
                     });
                 }
+
+                // Views
                 if (detailViews) {
-                    detailViews.innerHTML = `👁️ ${currentContent.views || 0} views`;
+                    detailViews.className = 'flex items-center gap-1 text-gray-400';
+                    detailViews.innerHTML = `👁️‍🗨️ ${currentContent.views || 0} views`;
                 }
-                if (detailDate) {
-                    detailDate.textContent = currentContent.date || new Date().toLocaleString();
-                }
+
+                // Delete button for admins
                 if (deleteThoughtBtn) {
-                    deleteThoughtBtn.classList.toggle('hidden', !isAdmin);
+                    deleteThoughtBtn.className = `${isAdmin ? 'flex' : 'hidden'} items-center px-4 py-2 text-sm font-medium text-red-500 hover:text-red-400`;
+                    deleteThoughtBtn.innerHTML = `
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Delete
+                    `;
                 }
+
+                // Setup reactions
                 setupReactions(currentContent);
+
             } catch (error) {
                 console.error('Error updating detail view:', error);
                 showNotification('Error displaying content details', 'error');
@@ -1316,11 +1389,11 @@ body {
                     currentContent.views = updated.views;
                     const detailViews = document.getElementById('detailViews');
                     if (detailViews) {
-                        detailViews.innerHTML = `👁️ ${updated.views} views`;
+                        detailViews.innerHTML = `👁️‍🗨️ ${updated.views} views`;
                     }
                     const cardViews = document.querySelector(`[data-thought-id="${thoughtId}"] .view-count`);
                     if (cardViews) {
-                        cardViews.textContent = `👁️ ${updated.views}`;
+                        cardViews.textContent = `👁️‍🗨️ ${updated.views}`;
                     }
                 }
             } catch (error) {
@@ -1376,41 +1449,41 @@ body {
 
                 const formattedText = formatText(text);
                 const truncatedText = truncateText(formattedText, 150);
-            
+                
                 const processedText = typeof marked === 'function' 
                     ? marked(processSpoilerText(escapeHtml(truncatedText)))
                     : processSpoilerText(escapeHtml(truncatedText)).replace(/\n/g, '<br>')
-                
+
                 return `
-                    <article class="content-card p-4 cursor-pointer animate__animated animate__fadeIn" 
+                    <article class="content-card p-4 cursor-pointer animate__animated animate__fadeIn"
                             data-thought-id="${content._id}"
                             onclick="toggleContentDetail('${encodeURIComponent(JSON.stringify(content))}')">
                         <div class="flex flex-col h-full">
                             <div class="flex justify-between items-start mb-2">
-                                <h2 class="text-lg font-bold text-gray-800 hover:text-teal-600 transition title-clamp">
+                                <h2 class="text-lg font-bold text-white hover:text-teal-600 transition title-clamp">
                                     ${escapeHtml(title)}
                                 </h2>
                                 <span class="tag text-xs flex-shrink-0 ml-2">
                                     ${escapeHtml(type)}
                                 </span>
                             </div>
-                            <div class="text-xs text-[#1F51FF] mb-2">
+                            <div class="text-xs text-gray-400 mb-2">
                                 By ${escapeHtml(author)}
                             </div>
                             <div class="content-preview flex-grow">
-                                <div class="prose prose-sm max-w-none text-clamp">
+                                <div class="prose prose-sm max-w-none text-clamp text-gray-200">
                                     ${processedText}
                                 </div>
                             </div>
-                            <div class="mt-auto pt-3 border-t">
+                            <div class="mt-auto pt-3 border-t border-gray-700">
                                 <div class="flex flex-wrap gap-1 mb-2">
-                                    ${tags.slice(0, 3).map(tag => `
-                                        <span class="text-xs text-teal-600">#${escapeHtml(tag)}</span>
-                                    `).join('')}
-                                    ${tags.length > 3 ? `<span class="text-xs text-gray-400">+${tags.length - 3}</span>` : ''}
+                                    ${tags.map(tag => `
+                                        <span class="text-xs font-medium" style="color: #00b4ff">#${escapeHtml(tag)}</span>
+                                    `).slice(0, 3).join('')}
+                                    ${tags.length > 3 ? `<span class="text-xs" style="color: #00b4ff">+${tags.length - 3}</span>` : ''}
                                 </div>
-                                <div class="flex justify-between items-center text-xs text-gray-500">
-                                    <span class="flex items-center gap-1 view-count">👁️ ${views}</span>
+                                <div class="flex justify-between items-center text-xs text-gray-400">
+                                    <span class="flex items-center gap-1 view-count">👁️‍🗨️ ${views}</span>
                                     <span>${escapeHtml(date)}</span>
                                 </div>
                             </div>
