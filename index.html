@@ -1611,6 +1611,8 @@ body {
             await originalDisplayContent(append);
             animateCards();
         };
+        
+
         async function shareContent(event) {
             event.stopPropagation();
             
@@ -1619,19 +1621,42 @@ body {
                 return;
             }
 
-            // Construct the absolute URL for sharing
             const baseUrl = window.location.origin + window.location.pathname;
             const shareUrl = `${baseUrl}?thought=${currentContent._id}`;
 
+            const contentType = (currentContent.type || 'thought').charAt(0).toUpperCase() + 
+                            (currentContent.type || 'thought').slice(1);
+            
+            const title = currentContent.title || `Untitled ${contentType}`;
+            let text = currentContent.text || '';
+            const author = currentContent.author || 'Anonymous';
+            
+            const maxLength = 150;
+            let truncatedText = text.length > maxLength 
+                ? text.substr(0, text.lastIndexOf(' ', maxLength)) + '...'
+                : text;
+
+            const typeEmoji = {
+                'Story': '📖',
+                'Thought': '💭',
+                'Poem': '📝',
+                'default': '✨'
+            };
+
             try {
                 if (navigator.share) {
+                    // Mobile format - more detailed with formatting
+                    const emoji = typeEmoji[contentType] || typeEmoji.default;
+                    const shareText = `${emoji} ${contentType}: "${title}" by ${author}\n"${truncatedText}"\nRead more 👇`;
+                    
                     await navigator.share({
-                        title: currentContent.title || 'Shared Thought',
-                        text: (currentContent.text || '').substring(0, 100) + '...',
+                        title: `${title} - by ${author}`,
+                        text: shareText,
                         url: shareUrl
                     });
                     showNotification('Shared successfully!', 'success');
                 } else {
+                    // Desktop format - just copy the URL
                     copyToClipboard(shareUrl);
                 }
             } catch (error) {
@@ -1639,7 +1664,19 @@ body {
                 copyToClipboard(shareUrl);
             }
         }
+
         function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text)
+                    .then(() => showNotification('Link copied to clipboard!', 'success'))
+                    .catch(() => fallbackCopyToClipboard(text));
+                return;
+            }
+            
+            fallbackCopyToClipboard(text);
+        }
+
+        function fallbackCopyToClipboard(text) {
             const input = document.createElement('input');
             input.style.position = 'fixed';
             input.style.opacity = 0;
