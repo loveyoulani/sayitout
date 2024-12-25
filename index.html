@@ -1605,60 +1605,168 @@ body {
         }
         
 
-        
         function formatText(text) {
-            // First, normalize line endings
-            const normalizedText = text.replace(/\r\n/g, '\n')
-                                    .trim();
-            
-            // Split into lines while preserving empty lines
+            // Early validation
+            if (!text || typeof text !== 'string') {
+                return '';
+            }
+
+            // Normalize line endings and trim
+            const normalizedText = text.replace(/\r\n/g, '\n').trim();
             const lines = normalizedText.split('\n');
+
+            // Detect if text is likely a poem
+            const isPoem = detectPoem(lines);
+            
+            if (isPoem) {
+                // For poems, preserve all line breaks and stanza structure
+                return preservePoetryFormat(lines);
+            }
+
+            // For prose, apply smart paragraph breaks
+            return formatProse(lines);
+        }
+
+        function detectPoem(lines) {
+            if (lines.length < 2) return false;
+            
+            const characteristics = {
+                shortLines: 0,
+                rhymingLines: 0,
+                consistentIndentation: 0,
+                stanzaBreaks: 0
+            };
+
+            let previousLine = '';
+            let stanzaBreakCount = 0;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                // Count short lines (typical in poetry)
+                if (line.length > 0 && line.length < 50) {
+                    characteristics.shortLines++;
+                }
+
+                // Check for rhyming patterns
+                if (previousLine && line) {
+                    if (mightRhyme(getLastWord(previousLine), getLastWord(line))) {
+                        characteristics.rhymingLines++;
+                    }
+                }
+
+                // Check for consistent indentation patterns
+                if (i > 0 && line && lines[i-1] && 
+                    line.match(/^\s*/)[0].length === lines[i-1].match(/^\s*/)[0].length) {
+                    characteristics.consistentIndentation++;
+                }
+
+                // Count stanza breaks (empty lines between groups of text)
+                if (!line && previousLine) {
+                    stanzaBreakCount++;
+                }
+
+                previousLine = line;
+            }
+
+            characteristics.stanzaBreaks = stanzaBreakCount;
+
+            // Calculate poetry likelihood score
+            const score = (
+                (characteristics.shortLines / lines.length) * 0.4 +
+                (characteristics.rhymingLines / (lines.length - 1)) * 0.3 +
+                (characteristics.consistentIndentation / (lines.length - 1)) * 0.15 +
+                (characteristics.stanzaBreaks > 0 ? 0.15 : 0)
+            );
+
+            return score > 0.5;
+        }
+
+        function preservePoetryFormat(lines) {
+            // Preserve all original line breaks and spacing for poems
+            return lines.join('\n');
+        }
+
+        function formatProse(lines) {
             const formattedLines = [];
-            const LONG_LINE_THRESHOLD = 100;
-            const NATURAL_BREAK_MARKERS = [
-                '?', '!', '.', // Basic sentence endings
-                '...', // Ellipsis
-                '—', '-', // Dashes
-                ':)', ':(', // Basic emojis
-                'BUT', 'AND', 'BECAUSE', // Emphasis words often starting new thoughts
-            ];
+            const SENTENCE_ENDINGS = /[.!?]+$/;
+            const CONJUNCTION_STARTS = /^(and|but|or|nor|for|yet|so|because|however|therefore|moreover|furthermore|consequently|thus|meanwhile|nevertheless|otherwise|alternatively)/i;
+            const QUOTE_STARTS = /^["'""]/;
+            const QUOTE_ENDS = /["'""]$/;
+            const PARENTHETICAL_CONTENT = /\([^)]*\)/;
+            
+            let currentParagraph = [];
             
             for (let i = 0; i < lines.length; i++) {
-                let line = lines[i];
+                const line = lines[i].trim();
                 
-                // Preserve empty lines for poetry formatting
-                if (line === '') {
-                    formattedLines.push(line);
+                if (!line) {
+                    // Handle empty lines as intentional paragraph breaks
+                    if (currentParagraph.length) {
+                        formattedLines.push(currentParagraph.join(' '));
+                        currentParagraph = [];
+                    }
+                    formattedLines.push('');
                     continue;
                 }
+
+                const nextLine = lines[i + 1] ? lines[i + 1].trim() : '';
                 
-                // Only trim non-empty lines
-                line = line.trim();
-                formattedLines.push(line);
-                
-                // Determine if we need a paragraph break (only for non-poetry content)
+                currentParagraph.push(line);
+
+                // Determine if we need a paragraph break
                 const needsBreak = (
-                    // Check if current line ends with a break marker
-                    NATURAL_BREAK_MARKERS.some(marker => 
-                        line.toUpperCase().endsWith(marker) ||
-                        line.toUpperCase().includes(marker + ' ')
-                    ) ||
-                    // Check if line is long
-                    line.length > LONG_LINE_THRESHOLD ||
-                    // Check if next line starts with an emphasis word
-                    (lines[i + 1] && NATURAL_BREAK_MARKERS.some(marker =>
-                        lines[i + 1].toUpperCase().startsWith(marker)
-                    ))
+                    // End of text
+                    !nextLine ||
+                    // Current line ends with sentence ending and next line doesn't start with conjunction
+                    (SENTENCE_ENDINGS.test(line) && !CONJUNCTION_STARTS.test(nextLine)) ||
+                    // Quote boundaries
+                    (QUOTE_ENDS.test(line) && !QUOTE_STARTS.test(nextLine)) ||
+                    // Parenthetical content boundaries
+                    (PARENTHETICAL_CONTENT.test(line) && !PARENTHETICAL_CONTENT.test(nextLine)) ||
+                    // Dialog or speaker changes
+                    (line.includes(':') && nextLine && !nextLine.startsWith(' ')) ||
+                    // Natural transition words at start of next line
+                    (nextLine && CONJUNCTION_STARTS.test(nextLine))
                 );
-                
-                // Add paragraph break if needed and not at the end
-                if (needsBreak && i < lines.length - 1) {
-                    formattedLines.push('');
+
+                if (needsBreak) {
+                    formattedLines.push(currentParagraph.join(' '));
+                    currentParagraph = [];
+                    
+                    // Add an extra line break for major transitions
+                    if (SENTENCE_ENDINGS.test(line) && 
+                        nextLine && 
+                        (CONJUNCTION_STARTS.test(nextLine) || nextLine.length > 100)) {
+                        formattedLines.push('');
+                    }
                 }
             }
-            
-            // Join lines, preserving line breaks
+
+            // Add any remaining content
+            if (currentParagraph.length) {
+                formattedLines.push(currentParagraph.join(' '));
+            }
+
             return formattedLines.join('\n');
+        }
+
+        function getLastWord(str) {
+            return str.trim().split(/\s+/).pop().toLowerCase().replace(/[^a-z]/g, '');
+        }
+
+        function mightRhyme(word1, word2) {
+            if (!word1 || !word2 || word1 === word2) return false;
+            
+            // Simple rhyme detection - check if words end with the same sounds
+            const getEnding = word => {
+                const vowels = 'aeiou';
+                let idx = word.length - 1;
+                while (idx >= 0 && !vowels.includes(word[idx])) idx--;
+                return word.slice(idx);
+            };
+            
+            return getEnding(word1) === getEnding(word2);
         }
 
         function validateContent(text) {
