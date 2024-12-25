@@ -1075,38 +1075,49 @@ body {
             }
         }
         async function loadAdminDashboard() {
-            if (!isAdmin) return;
-            try {
-                const response = await fetch(`${API_URL}/api/admin/dashboard`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                if (!response.ok) throw new Error('Failed to load dashboard data');
-                const data = await response.json();
-                document.getElementById('totalThoughts').textContent = data.totalThoughts;
-                document.getElementById('totalUsers').textContent = data.totalUsers;
-                document.getElementById('latestActivity').textContent = 
-                    `Latest thought posted ${new Date(data.recentThoughts[0]?.timestamp).toLocaleString()}`;
-                document.getElementById('recentThoughts').innerHTML = data.recentThoughts
-                    .map(thought => `
-                        <div class="p-3 bg-white-50 rounded-lg flex justify-between items-center">
-                            <div>
-                                <h4 class="font-bold">${escapeHtml(thought.title)}</h4>
-                                <p class="text-sm text-white-600">by ${escapeHtml(thought.author)}</p>
-                            </div>
-                            <button onclick="deleteThought('${thought._id}')"
-                                    class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
-                                Delete
-                            </button>
+        if (!isAdmin) return;
+        try {
+            const response = await fetch(`${API_URL}/api/admin/dashboard`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            if (!response.ok) throw new Error('Failed to load dashboard data');
+            const data = await response.json();
+            
+            document.getElementById('totalThoughts').textContent = data.totalThoughts;
+            document.getElementById('totalUsers').textContent = data.totalUsers;
+            document.getElementById('latestActivity').textContent = 
+                `Latest thought posted ${new Date(data.recentThoughts[0]?.timestamp).toLocaleString()}`;
+            
+            // Show all thoughts instead of just recent ones
+            const thoughtsResponse = await fetch(`${API_URL}/api/thoughts?limit=${data.totalThoughts}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            if (!thoughtsResponse.ok) throw new Error('Failed to load thoughts');
+            const thoughtsData = await thoughtsResponse.json();
+            
+            document.getElementById('recentThoughts').innerHTML = thoughtsData.thoughts
+                .map(thought => `
+                    <div class="p-3 bg-white-50 rounded-lg flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold">${escapeHtml(thought.title)}</h4>
+                            <p class="text-sm text-white-600">by ${escapeHtml(thought.author)}</p>
                         </div>
-                    `)
-                    .join('');
+                        <button onclick="deleteThought('${thought._id}')"
+                                class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                            Delete
+                        </button>
+                    </div>
+                `)
+                .join('');
 
-            } catch (error) {
-                showNotification(error.message, 'error');
-            }
+        } catch (error) {
+            showNotification(error.message, 'error');
         }
+    }
         function toggleAuthModal() {
             const modal = document.getElementById('authModal');
             modal.classList.toggle('hidden');
@@ -1151,14 +1162,13 @@ body {
                 try {
                     let content;
                     
-                    // Check if it's a direct thought ID from URL
-                    if (contentString.length < 40) { // Assuming it's an ID if it's short
+                    if (contentString.length < 40) { // Direct thought ID from URL
                         const response = await fetch(`${API_URL}/api/thoughts/${contentString}`);
                         if (!response.ok) throw new Error('Failed to fetch thought');
                         content = await response.json();
                     } else {
-                        // Parse the encoded JSON string
-                        const decodedString = decodeURIComponent(contentString);
+                        // Decode the Base64 encoded content
+                        const decodedString = decodeURIComponent(escape(atob(contentString)));
                         content = JSON.parse(decodedString);
                     }
                     
@@ -1175,7 +1185,6 @@ body {
                         incrementViews(currentContent._id);
                     }
                     
-                    // Update URL only if we have a valid thought ID
                     if (currentContent._id) {
                         const newUrl = `${window.location.pathname}?thought=${currentContent._id}`;
                         window.history.pushState({}, '', newUrl);
@@ -1187,10 +1196,8 @@ body {
                 } catch (error) {
                     console.error('Error parsing content:', error);
                     showNotification('Unable to load the content. Please try again.', 'error');
-                    return;
                 }
             } else {
-                // Clear the URL parameter when closing the modal
                 window.history.pushState({}, '', window.location.pathname);
                 modal.classList.add('hidden');
                 document.body.style.overflow = '';
@@ -1243,6 +1250,7 @@ body {
                 })
                 .catch(error => handleFetchError(error, 'Search failed'));
         }
+        
         function updateDetailView() {
             if (!currentContent) return;
             try {
@@ -1272,21 +1280,21 @@ body {
                     }
                 };
 
-                // Title
+                // Title - drastically reduced margin
                 if (detailTitle) {
-                    detailTitle.className = 'text-2xl font-bold mb-4 text-white';
+                    detailTitle.className = 'text-2xl font-bold mb-0.5 md:mb-4 text-white';
                     detailTitle.textContent = currentContent.title || 'Untitled';
                 }
 
-                // Metadata with fixed colors
+                // Metadata with minimal spacing
                 if (detailMetadata) {
-                    detailMetadata.className = 'flex flex-wrap items-center gap-3 mb-6';
+                    detailMetadata.className = 'flex flex-wrap items-center gap-1.5 md:gap-3 mb-1.5 md:mb-6';
                     detailMetadata.innerHTML = `
-                        <span class="px-3 py-1 rounded-full bg-[#192734] text-[#4DDFC6] border border-[#253341]">
+                        <span class="px-2 py-0.5 rounded-full bg-[#192734] text-[#4DDFC6] border border-[#253341]">
                             ${escapeHtml(currentContent.type || 'thought')}
                         </span>
-                        <div class="flex items-center gap-4">
-                            <div class="flex items-center gap-1.5">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-1">
                                 <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
                                 </svg>
@@ -1294,7 +1302,7 @@ body {
                                     ${escapeHtml(currentContent.author || 'Anonymous')}
                                 </span>
                             </div>
-                            <div class="flex items-center gap-1.5">
+                            <div class="flex items-center gap-1">
                                 <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"/>
                                 </svg>
@@ -1306,9 +1314,9 @@ body {
                     `;
                 }
 
-                // Tags section
+                // Tags section with minimal spacing
                 if (detailTags && currentContent.tags && currentContent.tags.length > 0) {
-                    detailTags.className = 'flex flex-wrap gap-2 mb-4';
+                    detailTags.className = 'flex flex-wrap gap-1 md:gap-2 mb-1.5 md:mb-4';
                     detailTags.innerHTML = currentContent.tags.map(tag => `
                         <span class="text-[#00b4ff] text-sm font-medium hover:opacity-80 cursor-pointer">
                             #${escapeHtml(tag)}
@@ -1316,11 +1324,11 @@ body {
                     `).join('');
                 }
 
-                // Content with updated colors
+                // Content with minimal spacing
                 if (detailContent) {
                     const sanitizedText = escapeHtml(currentContent.text || '');
                     const processedText = processSpoilerText(sanitizedText);
-                    detailContent.className = 'prose max-w-none mb-6 text-gray-200';
+                    detailContent.className = 'prose max-w-none mb-2 md:mb-6 text-gray-200';
                     detailContent.innerHTML = marked.parse(processedText);
                     
                     // Spoiler functionality
@@ -1332,17 +1340,17 @@ body {
                     });
                 }
 
-                // Views
+                // Views with minimal spacing
                 if (detailViews) {
-                    detailViews.className = 'flex items-center gap-1 text-gray-400';
+                    detailViews.className = 'flex items-center gap-0.5 text-gray-400';
                     detailViews.innerHTML = `👁️‍🗨️ ${currentContent.views || 0} views`;
                 }
 
                 // Delete button for admins
                 if (deleteThoughtBtn) {
-                    deleteThoughtBtn.className = `${isAdmin ? 'flex' : 'hidden'} items-center px-4 py-2 text-sm font-medium text-red-500 hover:text-red-400`;
+                    deleteThoughtBtn.className = `${isAdmin ? 'flex' : 'hidden'} items-center px-3 py-1.5 text-sm font-medium text-red-500 hover:text-red-400`;
                     deleteThoughtBtn.innerHTML = `
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
                         Delete
@@ -1439,6 +1447,10 @@ body {
                     console.error('Invalid content object:', content);
                     return '';
                 }
+
+                // Base64 encode the content to handle special characters safely
+                const encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(content))));
+                
                 const title = content.title || 'Untitled';
                 const text = content.text || '';
                 const type = content.type || 'thought';
@@ -1452,12 +1464,12 @@ body {
                 
                 const processedText = typeof marked === 'function' 
                     ? marked(processSpoilerText(escapeHtml(truncatedText)))
-                    : processSpoilerText(escapeHtml(truncatedText)).replace(/\n/g, '<br>')
+                    : processSpoilerText(escapeHtml(truncatedText)).replace(/\n/g, '<br>');
 
                 return `
                     <article class="content-card p-4 cursor-pointer animate__animated animate__fadeIn"
                             data-thought-id="${content._id}"
-                            onclick="toggleContentDetail('${encodeURIComponent(JSON.stringify(content))}')">
+                            onclick="toggleContentDetail('${encodedContent}')">
                         <div class="flex flex-col h-full">
                             <div class="flex justify-between items-start mb-2">
                                 <h2 class="text-lg font-bold text-white hover:text-teal-600 transition title-clamp">
@@ -1495,6 +1507,7 @@ body {
                 return '';
             }
         }
+
 
         function updateMobileUI(isAuthenticated) {
                 const mobileShareBtn = document.getElementById('mobileShareBtn');
