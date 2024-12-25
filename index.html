@@ -929,6 +929,7 @@ body {
                 if (loader) loader.style.display = 'none';
             }
         }
+        
         async function saveContent() {
             if (!authToken) {
                 showNotification('Please login to share content', 'error');
@@ -991,11 +992,13 @@ body {
                 await displayContent();
                 showNotification('Your thought has been shared successfully!', 'success');
                 
-                setTimeout(() => toggleContentDetail(encodeURIComponent(JSON.stringify(savedContent))), 500);
+                // Use the saved content's ID directly
+                setTimeout(() => toggleContentDetail(savedContent._id), 500);
             } catch (error) {
                 showNotification(error.message, 'error');
             }
         }
+
         function createEmptyState() {
             const isLoggedIn = !!authToken;
             return `
@@ -1162,14 +1165,20 @@ body {
                 try {
                     let content;
                     
-                    if (contentString.length < 40) { // Direct thought ID from URL
+                    // Check if it's a MongoDB ID (24 hex chars)
+                    if (typeof contentString === 'string' && /^[0-9a-fA-F]{24}$/.test(contentString)) {
                         const response = await fetch(`${API_URL}/api/thoughts/${contentString}`);
                         if (!response.ok) throw new Error('Failed to fetch thought');
                         content = await response.json();
                     } else {
-                        // Decode the Base64 encoded content
-                        const decodedString = decodeURIComponent(escape(atob(contentString)));
-                        content = JSON.parse(decodedString);
+                        try {
+                            // Try Base64 decoding
+                            const decodedString = decodeURIComponent(escape(atob(contentString)));
+                            content = JSON.parse(decodedString);
+                        } catch (e) {
+                            // If that fails, try direct JSON parsing
+                            content = JSON.parse(decodeURIComponent(contentString));
+                        }
                     }
                     
                     if (!content || !content.text) {
@@ -1280,13 +1289,13 @@ body {
                     }
                 };
 
-                // Title - drastically reduced margin
+                // Title
                 if (detailTitle) {
                     detailTitle.className = 'text-2xl font-bold mb-0.5 md:mb-4 text-white';
                     detailTitle.textContent = currentContent.title || 'Untitled';
                 }
 
-                // Metadata with minimal spacing
+                // Metadata
                 if (detailMetadata) {
                     detailMetadata.className = 'flex flex-wrap items-center gap-1.5 md:gap-3 mb-1.5 md:mb-6';
                     detailMetadata.innerHTML = `
@@ -1314,7 +1323,7 @@ body {
                     `;
                 }
 
-                // Tags section with minimal spacing
+                // Tags
                 if (detailTags && currentContent.tags && currentContent.tags.length > 0) {
                     detailTags.className = 'flex flex-wrap gap-1 md:gap-2 mb-1.5 md:mb-4';
                     detailTags.innerHTML = currentContent.tags.map(tag => `
@@ -1324,11 +1333,11 @@ body {
                     `).join('');
                 }
 
-                // Content with minimal spacing
+                // Content with preserved line breaks
                 if (detailContent) {
                     const sanitizedText = escapeHtml(currentContent.text || '');
                     const processedText = processSpoilerText(sanitizedText);
-                    detailContent.className = 'prose max-w-none mb-2 md:mb-6 text-gray-200';
+                    detailContent.className = 'prose max-w-none mb-2 md:mb-6 text-gray-200 whitespace-pre-line';
                     detailContent.innerHTML = marked.parse(processedText);
                     
                     // Spoiler functionality
@@ -1340,7 +1349,7 @@ body {
                     });
                 }
 
-                // Views with minimal spacing
+                // Views
                 if (detailViews) {
                     detailViews.className = 'flex items-center gap-0.5 text-gray-400';
                     detailViews.innerHTML = `👁️‍🗨️ ${currentContent.views || 0} views`;
@@ -1441,6 +1450,7 @@ body {
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
+        
         function createContentCard(content) {
             try {
                 if (!content || typeof content !== 'object') {
@@ -1460,10 +1470,12 @@ body {
                 const tags = Array.isArray(content.tags) ? content.tags : [];
 
                 const formattedText = formatText(text);
+                // For preview, truncate but preserve newlines
                 const truncatedText = truncateText(formattedText, 150);
                 
+                // Process the text with marked while preserving line breaks
                 const processedText = typeof marked === 'function' 
-                    ? marked(processSpoilerText(escapeHtml(truncatedText)))
+                    ? marked(processSpoilerText(escapeHtml(truncatedText)).replace(/\n/g, '<br>'))
                     : processSpoilerText(escapeHtml(truncatedText)).replace(/\n/g, '<br>');
 
                 return `
@@ -1507,7 +1519,6 @@ body {
                 return '';
             }
         }
-
 
         function updateMobileUI(isAuthenticated) {
                 const mobileShareBtn = document.getElementById('mobileShareBtn');
@@ -1592,12 +1603,15 @@ body {
         function processSpoilerText(text) {
             return text.replace(/\|\|(.*?)\|\|/g, '<span class="spoiler">$1</span>');
         }
+        
+
+        
         function formatText(text) {
-            // First, normalize line endings and remove any excessive whitespace
+            // First, normalize line endings
             const normalizedText = text.replace(/\r\n/g, '\n')
-                                    .replace(/\n{3,}/g, '\n\n')
                                     .trim();
             
+            // Split into lines while preserving empty lines
             const lines = normalizedText.split('\n');
             const formattedLines = [];
             const LONG_LINE_THRESHOLD = 100;
@@ -1610,15 +1624,19 @@ body {
             ];
             
             for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
+                let line = lines[i];
                 
-                // Skip if line is empty
-                if (line.length === 0) continue;
+                // Preserve empty lines for poetry formatting
+                if (line === '') {
+                    formattedLines.push(line);
+                    continue;
+                }
                 
-                // Add line to formatted output
+                // Only trim non-empty lines
+                line = line.trim();
                 formattedLines.push(line);
                 
-                // Determine if we need a paragraph break
+                // Determine if we need a paragraph break (only for non-poetry content)
                 const needsBreak = (
                     // Check if current line ends with a break marker
                     NATURAL_BREAK_MARKERS.some(marker => 
@@ -1639,13 +1657,10 @@ body {
                 }
             }
             
-            // Join lines and ensure consistent paragraph spacing
-            return formattedLines
-                .join('\n')
-                .replace(/\n{3,}/g, '\n\n')
-                .trim();
+            // Join lines, preserving line breaks
+            return formattedLines.join('\n');
         }
-        
+
         function validateContent(text) {
             const wordCount = text.trim().split(/\s+/).length;
             const MAX_WORDS = 10000;
