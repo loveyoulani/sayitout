@@ -456,19 +456,19 @@
             🔍 Search
         </button>
         <button id="mobileShareBtn" onclick="toggleNewContent()" class="hidden text-gray-600 hover:text-gray-900">
-            ✏️ Share
+            Share
         </button>
         <button id="mobileAuthBtn" onclick="toggleAuthModal()" class="text-gray-600 hover:text-gray-900">
-            👤 Login
+            Login
         </button>
         <button id="mobileLogoutBtn" onclick="logout()" class="hidden text-gray-600 hover:text-gray-900">
-            🚪 Logout
+            Logout
         </button>
     </div>
     <!-- Main Content Area -->
     <main class="container mx-auto px-4 pt-24 bg-[#15202B]">
         <div class="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 class="text-2xl font-bold text-white">Discover Thoughts</h2>
+            <h2 class="text-2xl font-bold text-white">Discover ..</h2>
             <div class="flex flex-wrap gap-4">
                 <select id="sortBy" onchange="displayContent()" 
                         class="p-2 rounded-lg border border-[#192734] bg-[#192734] text-black focus:border-[#1DA1F2] focus:ring-2 focus:ring-[#1DA1F2] transition-all">
@@ -527,19 +527,19 @@
     <div id="contentForm" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4">
         <div class="modal-content w-full max-w-2xl p-6 animate__animated animate__fadeInUp bg-[#192734]">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold gradient-text">Share Your Thoughts</h2>
+                <h2 class="text-2xl font-bold gradient-text">Say It OUT</h2>
                 <button onclick="toggleNewContent()" class="text-[#8899A6] hover:text-white transition-colors">✕</button>
             </div>
             <div class="space-y-4">
                 <select id="contentType" class="w-full p-3 rounded-lg border border-[#192734] bg-[#15202B] text-black focus:border-[#1DA1F2] focus:ring-2 focus:ring-[#1DA1F2]">
-                    <option value="thought">Random Thought</option>
+                    <option value="thought">Thought</option>
                     <option value="poem">Poem</option>
                     <option value="quote">Quote</option>
-                    <option value="story">Short Story</option>
+                    <option value="story">Story</option>
                 </select>
                 <div class="floating-input" id="titleContainer">
                     <input type="text" id="contentTitle" placeholder=" " class="w-full bg-[#15202B] text-white border-[#192734]">
-                    <label class="text-[#8899A6]">Title (required for stories and poems)</label>
+                    <label class="text-[#8899A6]">Title</label>
                 </div>
                 <div class="floating-input">
                     <input type="text" id="authorNickname" placeholder=" " class="w-full bg-[#15202B] text-white border-[#192734]">
@@ -814,19 +814,47 @@
 
         
         function checkAuth() {
-            if (authToken) {
-                const payload = parseJwt(authToken);
-                currentUser = payload;
-                isAdmin = payload.isAdmin;
-                updateUIForAuth();
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const payload = parseJwt(token);
+                    // Check if token is expired or will expire soon (within 5 minutes)
+                    const currentTime = Date.now() / 1000;
+                    if (payload.exp && payload.exp - currentTime > 300) {
+                        currentUser = payload;
+                        isAdmin = payload.isAdmin;
+                        updateUIForAuth();
+                        return true;
+                    } else {
+                        // Token is expired or will expire soon - clear it
+                        localStorage.removeItem('token');
+                        authToken = null;
+                        currentUser = null;
+                        isAdmin = false;
+                        return false;
+                    }
+                } catch (e) {
+                    console.error('Token validation failed:', e);
+                    localStorage.removeItem('token');
+                    authToken = null;
+                    currentUser = null;
+                    isAdmin = false;
+                    return false;
+                }
             }
+            return false;
         }
+
         function parseJwt(token) {
             try {
                 const base64Url = token.split('.')[1];
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                return JSON.parse(window.atob(base64));
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
             } catch (e) {
+                console.error('Token parsing failed:', e);
                 return null;
             }
         }
@@ -1227,6 +1255,7 @@
                 document.getElementById('searchInput').focus();
             }
         }
+        
         function searchContent() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const resultsContainer = document.getElementById('searchResults');
@@ -1235,31 +1264,62 @@
                 resultsContainer.innerHTML = '';
                 return;
             }
+            resultsContainer.innerHTML = '<div class="p-4 text-gray-500">Searching...</div>';
+            clearTimeout(window._searchTimeout);
+            window._searchTimeout = setTimeout(() => {
+                fetch(`${API_URL}/api/thoughts?search=${encodeURIComponent(searchTerm)}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Search failed');
+                        return response.json();
+                    })
+                    .then(data => {
+                        const thoughts = data.thoughts || [];
+                        if (thoughts.length === 0) {
+                            resultsContainer.innerHTML = '<div class="p-4 text-gray-500">No results found</div>';
+                            return;
+                        }
 
-            fetch(`${API_URL}/api/thoughts`)
-                .then(response => response.json())
-                .then(data => {
-                    // Extract thoughts array from paginated response
-                    const thoughts = data.thoughts || [];
-                    
-                    const filtered = thoughts.filter(content =>
-                        content.title.toLowerCase().includes(searchTerm) ||
-                        content.text.toLowerCase().includes(searchTerm)
-                    );
+                        resultsContainer.innerHTML = thoughts.map(content => {
+                            const safeContent = {
+                                _id: content._id,
+                                title: content.title,
+                                text: content.text,
+                                type: content.type,
+                                author: content.author,
+                                date: content.date,
+                                views: content.views,
+                                tags: content.tags,
+                                reactions: content.reactions
+                            };
 
-                    resultsContainer.innerHTML = filtered.length ?
-                        filtered.map(content => `
-                            <div class="p-4 border-b cursor-pointer hover:bg-gray-50 transition"
-                                onclick="toggleSearch(); toggleContentDetail('${encodeURIComponent(JSON.stringify(content))}')">
-                                <h3 class="font-bold">${escapeHtml(content.title)}</h3>
-                                <p class="text-sm text-gray-600">${escapeHtml(content.text.substring(0, 100))}...</p>
-                            </div>
-                        `).join('') :
-                        '<div class="p-4 text-gray-500">No results found</div>';
-                })
-                .catch(error => handleFetchError(error, 'Search failed'));
+                            return `
+                                <div class="p-4 border-b cursor-pointer hover:bg-gray-50 transition"
+                                    onclick="handleSearchResultClick('${content._id}')">
+                                    <h3 class="font-bold">${escapeHtml(content.title || 'Untitled')}</h3>
+                                    <p class="text-sm text-gray-600">${escapeHtml(content.text.substring(0, 100))}...</p>
+                                </div>
+                            `;
+                        }).join('');
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        resultsContainer.innerHTML = '<div class="p-4 text-red-500">Error performing search. Please try again.</div>';
+                    });
+            }, 300);
         }
-        
+        async function handleSearchResultClick(thoughtId) {
+            try {
+                const response = await fetch(`${API_URL}/api/thoughts/${thoughtId}`);
+                if (!response.ok) throw new Error('Failed to fetch thought');
+                
+                const thought = await response.json();
+                toggleSearch(); 
+                await toggleContentDetail(thought._id);
+            } catch (error) {
+                console.error('Error handling search result:', error);
+                showNotification('Unable to load the content. Please try again.', 'error');
+            }
+        }
         function updateDetailView() {
             if (!currentContent) return;
             try {
@@ -1874,6 +1934,55 @@
             }
         }
 
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAuth()) {
+                handleTokenRefresh();
+            }
+            setInterval(handleTokenRefresh, 300000);
+            displayContent();
+            handleMobileModal();
+            setupTagInput();
+            setupInfiniteScroll();
+            window.addEventListener('unhandledrejection', event => {
+                console.error('Unhandled promise rejection:', event.reason);
+                handleFetchError(event.reason, 'An unexpected error occurred');
+            });
+        });
+
+        async function handleTokenRefresh() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/refresh`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const { token: newToken } = await response.json();
+                    localStorage.setItem('token', newToken);
+                    authToken = newToken;
+                    checkAuth();
+                } else {
+                    localStorage.removeItem('token');
+                    authToken = null;
+                    currentUser = null;
+                    isAdmin = false;
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Token refresh failed:', error);
+                localStorage.removeItem('token');
+                authToken = null;
+                currentUser = null;
+                isAdmin = false;
+            }
+        }
+
         function copyToClipboard(text) {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text)
@@ -1902,6 +2011,5 @@
             document.body.removeChild(input);
         }
     </script>
-    
 </body>
 </html>
