@@ -1935,10 +1935,6 @@
                 handleTokenRefresh();
             }
             setInterval(handleTokenRefresh, 300000);
-            displayContent();
-            handleMobileModal();
-            setupTagInput();
-            setupInfiniteScroll();
             window.addEventListener('unhandledrejection', event => {
                 console.error('Unhandled promise rejection:', event.reason);
                 handleFetchError(event.reason, 'An unexpected error occurred');
